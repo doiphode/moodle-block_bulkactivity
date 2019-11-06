@@ -6,11 +6,9 @@ $PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string("pluginname","block_bulkactivity"));
 $PAGE->set_heading(get_string("pluginname","block_bulkactivity"));
 $PAGE->navbar->ignore_active();
-
+$PAGE->requires->jquery();
 $PAGE->set_url($CFG->wwwroot . "/blocks/bulkactivity/createbulkactivity.php");
 $PAGE->requires->css( new moodle_url('https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css'));
-$PAGE->requires->jquery();
-
 
 echo $OUTPUT->header();
 if(!isset($_POST['createduplicate'])) {
@@ -19,7 +17,7 @@ if(!isset($_POST['createduplicate'])) {
     $cmid = required_param('cba', PARAM_INT);
 
     $sectionreturn = optional_param('sr', null, PARAM_INT);
-    $sql="select id,name from {course_categories} where visible =1 && parent =0";
+    $sql="select id,name from {course_categories} where coursecount >0 && visible =1";
     $categories =$DB->get_records_sql($sql);
 
     $cm = get_coursemodule_from_id('', $modid, 0, true, MUST_EXIST);
@@ -40,38 +38,29 @@ if(!isset($_POST['createduplicate'])) {
 
     }
   ?>
-
-    <style>
-        .h3, h3 {
-            font-size: 1.640625rem;
-        }
-    </style>
-
-
     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
     <div class="container">
-        <input type="hidden" id="currentcourseid" value="<?=$cm->course?>">
         <h3><?=get_string('courselistheader','block_bulkactivity')?></h3>
-        <form action="createbulkactivities.php" method="post" id="bulkactform">
+        <form action="createbulkactivities.php" id="bulkactform" method="post">
         <?php
         echo '<div id="accordion" class="accordion panel-group">
 
 				<div class="panel-body" >';
         foreach($categories as $category) {
-            echo ' <div class="panel panel-default" >
-                        <div class="panel-heading categorydiv" id="category_'.$category->id.'" >
-						<h3 class="panel-title categoryname" style="font-weight: 100">
+            echo ' <div class="panel panel-default">
+                        <div class="panel-heading " >
+						<h4 class="panel-title">
 							<a data-toggle="collapse"    aria-expanded="true" aria-controls="collapse_'.$category->id.'"  href="#collapse_'.$category->id.'">
 								<i class="indicator fa fa-caret-right" aria-hidden="true" style="color: silver;"></i> '.$category->name.'
 							</a>
-						</h3>
+						</h4>
 					</div>
                         <div id="collapse_'.$category->id.'" class="collapse"  data-parent="#accordion" style="padding-left: 15px;padding-right: 15px;">
-                        <div class="card-body" style="padding: 0px;">
-                             <div class="form-row checkbox-group required categorycourses" id="categorycourses_'.$category->id.'" >
-                            
+                        <div class="card-body">
+                             <div class="form-row checkbox-group required">
+             '.courselist($category->id,$cm->course).'
              </div>
          </div>
 					</div></div>';
@@ -79,7 +68,7 @@ if(!isset($_POST['createduplicate'])) {
         echo '</div></div>';
         ?>
             <input type="hidden" name="cmid" value="<?=$cmid?>">
-            <input type="submit" class="btn btn-primary" value="<?=get_string("submit")?>" name="createduplicate" style="margin-top: 30px;">
+            <input type="submit" class="btn btn-primary" value="<?=get_string("submit")?>" name="createduplicate">
         </form>
     </div>
 
@@ -270,71 +259,20 @@ echo $OUTPUT->footer();
 ?>
 <script>
 
-
-
-
-        $('form#bulkactform').submit(function(e){
-
-            if(!$('div.checkbox-group.required :checkbox:checked').length > 0){
-                e.preventDefault();
-               alert('Please select one or more courses');
-
-            }
-    });
-
    function toggleChevron(e) {
        $(e.target)
            .prev('.panel-heading')
            .find("i.indicator")
            .toggleClass('fa-caret-down fa-caret-right');
    }
-   $('.accordion').on('hidden.bs.collapse', toggleChevron);
-   $('.accordion').on('shown.bs.collapse', toggleChevron);
+   $('#accordion').on('hidden.bs.collapse', toggleChevron);
+   $('#accordion').on('shown.bs.collapse', toggleChevron);
 
-        function get_action_url(name, args)
-        {
-            var url = M.cfg.wwwroot + '/blocks/bulkactivity/' + name + '.php';
-            if (args)
-            {
-                var q = [];
-                for (var k in args)
-                {
-                    q.push(k + '=' + encodeURIComponent(args[k]));
-                }
-                url += '?' + q.join('&');
-            }
-            return url;
-        }
-
-        $('.container').on('click', '.categorydiv', function(e) {
-
-            var id = this.id;
-            var catarray = id.split('_');
-
-             var idpost = catarray.length-1;
-          if(catarray.length >2){
-
-              var coursediv = catarray[1]+'_'+catarray[2]
-          }else{
-              coursediv = catarray[1];
-          }
-            var categoryid = catarray[idpost];
-            var currentcourseid = $('#currentcourseid').val();
-            $.ajax({
-                url:get_action_url('ajax'),
-                type: 'POST',
-                data : {'request':'getcagegorycourse',categoryid:categoryid,currentcourseid:currentcourseid},
-                success: function(data){
-                $('#categorycourses_'+coursediv).html(data);
-                $('#category_'+coursediv).removeClass("categorydiv");
-
-
-
-
-                }
-            });
-
-        });
-
+   $('form#bulkactform').submit(function(e){
+           if(!$('div.checkbox-group.required :checkbox:checked').length > 0){
+               e.preventDefault();
+               alert('Please select one or more courses');
+           }
+   });
 
 </script>
