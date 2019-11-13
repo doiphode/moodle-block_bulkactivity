@@ -23,6 +23,8 @@ require(['jquery'], function ($)
 {
     $(document).ready(function()
     {
+
+
         /** @var {Object}  The icon configurations */
         var icon = {
             // actions
@@ -108,7 +110,6 @@ require(['jquery'], function ($)
          */
         function verify_layout()
         {
-//            var menuelement = $block.find('.menubar .dropdown .dropdown-menu');
             var menuelement = $block.find('.menubar .dropdown .dropdown-menu');
             return (menuelement.length);
         }
@@ -344,7 +345,67 @@ require(['jquery'], function ($)
                     add_backup_comand($(this));
                 });
             }
-            
+
+            // $("li.section").each(function()
+            // {
+            //     var sectionID = $(this).find("div.content h3.sectionname span.inplaceeditable").attr("data-itemid");
+            //
+            //     var $menu = $(this).find("ul[role='menu']").first();
+            //
+            //     if($menu.length)
+            //     {
+            //         var li = $menu.find('li').first().clone();
+            //         var img = li.find('img');
+            //
+            //         if (img.length) {
+            //             img.attr('alt', str('createactivityincourses','block_bulkactivity')).attr('title', str('createactivityincourses','block_bulkactivity')).attr('src', M.util.image_url(icon['backup'].pix, null));
+            //         } else {
+            //             li.find('i').attr('class', 'icon fa fa-upload').attr('title', str('createactivityincourses','block_bulkactivity')).attr('aria-label', str('createactivityincourses','block_bulkactivity'));
+            //         }
+            //
+            //         li.find('span').html(str('createactivityincourses','block_bulkactivity'));
+            //         li.find('a').attr('href', 'javascript:void(0)');
+            //
+            //         $menu.append(li);
+            //
+            //         li.find('a').click(function()
+            //         {
+            //             $.on_section_backup(sectionID);
+            //         });
+            //     }
+            //     else
+            //     {
+            //         $menu = $(this).find("div[role='menu']").first();
+            //
+            //         var $backup = null;
+            //
+            //         if($menu.length)
+            //         {
+            //             $backup = create_special_activity_command("createactivityincourses");
+            //
+            //             $menu.append($backup.attr("role", "menuitem"));
+            //
+            //             if($menu.css("display") === "none")
+            //             {
+            //              //   $backup.append($("<span class='menu-action-text'/>").append($backup.attr('title')));
+            //             }
+            //             // if($menu.find("i.fa"))
+            //             // {
+            //                 // $backup.find("img").replaceWith($("<i class='fa fa-cloud-download icon'/>"));
+            //             // }
+            //         }
+            //         else
+            //         {
+            //             $backup = create_command("createactivityincourses");
+            //             $activity.find(".commands").append($backup);
+            //         }
+            //
+            //         $backup.click(function ()
+            //         {
+            //             $.on_section_backup(sectionID);
+            //         });
+            //     }
+            // });
         };
 
         /**
@@ -362,5 +423,13 @@ require(['jquery'], function ($)
         $('div#bulkactivity-spinner-modal div.spinner-container').prepend($spinner);
 
         $.init();
+
+
+
+
+
+
+
+
     })
 });
