@@ -10,13 +10,12 @@ function getcategories($parentid)
     $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =$parentid";
     return $categories = $DB->get_records_sql($sql);
 }
-function courselist($category,$course){
+function courselist($category,$course,$checked){ // Added ,$checked
     global $DB;
 
     $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category";
     $courses = $DB->get_records_sql($sql);
     $courselist = "";
-
 
 
 
@@ -26,8 +25,10 @@ function courselist($category,$course){
         foreach (getcategories($category) as $chidld) {
             $courselist .= ' <div class="panel panel-default " >
                         <div class="panel-heading categorydiv" id="category_' . $category.'_'.$chidld->id.'" >
+
 						<h3 class="panel-title categoryname" style="font-weight: 100">
-							<a data-toggle="collapse"    aria-expanded="true" aria-controls="collapse_' . $category.'_'.$chidld->id.'"  href="#collapse_' . $category.'_'.$chidld->id.'">
+                            <input type="checkbox" value="1" id="checkall_' . $category.'_'.$chidld->id.'" class="checkall">
+                            <a data-toggle="collapse"    aria-expanded="true" aria-controls="collapse_' . $category.'_'.$chidld->id.'"  href="#collapse_' . $category.'_'.$chidld->id.'">
 								<i class="indicator indicatorerro'.$category.$chidld->id.' fa fa-caret-right"  id="indicatorerro_' . $category.''.$chidld->id.'" aria-hidden="true" style="color: silver;"></i> ' . $chidld->name . '
 							</a>
 						</h3>
@@ -45,7 +46,7 @@ function courselist($category,$course){
     }
     foreach($courses as $course){
         $courselist .='<div class="col-md-6 custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" name="course[]" value="'.$course->id.'" id="customCheck'.$course->id.'">
+            <input type="checkbox" class="custom-control-input" name="course[]" value="'.$course->id.'" id="customCheck'.$course->id.'" '.$checked.'> <!-- Custom code 14 nov 19 - Added checked in the checkbox-->
             <label class="custom-control-label" for="customCheck'.$course->id.'">'.$course->fullname.'</label>
         </div>';
     }
@@ -57,8 +58,8 @@ if($request['request'] == 'getcagegorycourse'){
 
     $categoryid = $request['categoryid'];
     $currentcourseid = $request['currentcourseid'];
+    $checked = $_POST['checked'];
 
-
- echo   courselist($categoryid,$currentcourseid);
+ echo   courselist($categoryid,$currentcourseid,$checked);// Added ,$checked
 exit;
 }

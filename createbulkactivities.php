@@ -44,6 +44,9 @@ if(!isset($_POST['createduplicate'])) {
         .h3, h3 {
             font-size: 1.640625rem;
         }
+        .custom-control-input{
+            position: relative !important;
+        }
     </style>
 <!--    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>-->
     <div class="container">
@@ -57,7 +60,9 @@ if(!isset($_POST['createduplicate'])) {
         foreach($categories as $category) {
             echo ' <div class="panel panel-default" >
                         <div class="panel-heading categorydiv" id="category_'.$category->id.'" >
+
 						<h3 class="panel-title categoryname" style="font-weight: 100">
+                            <input type="checkbox" class="checkall" id="checkall_'.$category->id.'" value="1">&nbsp;
 							<a data-toggle="collapse"    aria-expanded="true" aria-controls="collapse_'.$category->id.'"  href="#collapse_'.$category->id.'">
 								<i class="indicator indicatorerro fa fa-caret-right" id="indicatorerro_'.$category->id.'" aria-hidden="true" style="color: silver;"></i> '.$category->name.'
 							</a>
@@ -267,6 +272,41 @@ echo $OUTPUT->footer();
 
 
 
+    $('#bulkactform').on('change','.checkall',function(){
+
+        var id = this.id;
+        var split_id = id.split("_");
+
+        var postfix = "";
+        for(var i=1;i<split_id.length;i++){
+            // console.log("split : " + split_id[i]);
+            if(postfix == ""){
+                postfix = split_id[i];
+            }else{
+                postfix += "_" + split_id[i];
+            }
+        }
+        
+        var checked = false;
+        if ($(this).is(":checked")) {
+            checked = true;
+            console.log("checked");
+        }else{
+            console.log("unchecked");
+        }
+
+        setTimeout(function(){
+            console.log("id : #collapse_"+postfix);
+            $('#collapse_'+postfix+" input[type=checkbox]").each(function(){
+
+                $(this).prop('checked', checked); // Checks it
+        
+            });
+        },1000);
+        
+    });
+
+  
 
         $('form#bulkactform').submit(function(e){
 
@@ -341,9 +381,6 @@ echo $OUTPUT->footer();
 
                     }
 
-
-
-
                 });
 
             }
@@ -357,10 +394,30 @@ echo $OUTPUT->footer();
             }
             var categoryid = catarray[idpost];
             var currentcourseid = $('#currentcourseid').val();
+
+            var checked = "";
+            var split_id = id.split("_");
+            if(split_id.length > 0){  
+                var postfix = "";
+                for(var i=1;i<split_id.length;i++){
+                    // console.log("split : " + split_id[i]);
+                    if(postfix == ""){
+                        postfix = split_id[i];
+                    }else{
+                        postfix += "_" + split_id[i];
+                    }
+                }
+
+                
+                // Check checkall checkbox checked or not
+                if ($('#checkall_' + postfix ).is(":checked")) {
+                    checked = "checked";
+                }
+            }
             $.ajax({
                 url:get_action_url('ajax'),
                 type: 'POST',
-                data : {'request':'getcagegorycourse',categoryid:categoryid,currentcourseid:currentcourseid},
+                data : {'request':'getcagegorycourse',categoryid:categoryid,currentcourseid:currentcourseid,checked:checked},// Added checked: checked
                 success: function(data){
                     $('#categorycourses_'+coursediv).html(data);
                     // $('#category_'+coursediv).removeClass("categorydiv");
