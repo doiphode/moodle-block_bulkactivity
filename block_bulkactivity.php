@@ -140,5 +140,4 @@ class block_bulkactivity extends block_base
 		return moodle_major_version() >= 3.2;
 	}
 
-
 }

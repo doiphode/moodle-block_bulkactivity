@@ -23,7 +23,7 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-$plugin->version   = 2019012000;
+$plugin->version   = 2019012001;
 $plugin->requires  = 2017050500; // Moodle 3.3
 $plugin->component = 'block_bulkactivity';
 $plugin->release   = '3.6, release 1';

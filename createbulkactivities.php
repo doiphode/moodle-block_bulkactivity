@@ -42,12 +42,31 @@ if(!isset($_POST['createduplicate'])) {
 
     <style>
         .h3, h3 {
-            font-size: 1.640625rem;
+            font-size: 1.640625em;
+            margin: 15px 0px 5px 0px!important;
+}
+.custom-control-input{
+    position: relative !important;
+}
+h3 a, custom-control-label {
+    font-size: .75em;
+    font-weight: ;
+    color: #005A9A;
+    font-family: "Source Sans Pro","Helvetica Neue",Arial,sans-serif;
+    font-weight: 400;
+}
+        .fa {
+            font-size: 20px!important;
+            color:#999999!important;
         }
-        .custom-control-input{
-            position: relative !important;
+
+        .form-row {
+            margin-left: 22px!important;
+            text-transform: uppercase!important;
+            color: #005A9A;
         }
-    </style>
+
+</style>
 <!--    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>-->
     <div class="container">
         <input type="hidden" id="currentcourseid" value="<?=$cm->course?>">
@@ -63,7 +82,7 @@ if(!isset($_POST['createduplicate'])) {
 
 						<h3 class="panel-title categoryname" style="font-weight: 100">
                             <input type="checkbox" class="checkall" id="checkall_'.$category->id.'" value="1">&nbsp;
-							<a data-toggle="collapse"    aria-expanded="true" aria-controls="collapse_'.$category->id.'"  href="#collapse_'.$category->id.'">
+                            <a data-toggle="collapse"    aria-expanded="true" aria-controls="collapse_'.$category->id.'"  href="#collapse_'.$category->id.'">
 								<i class="indicator indicatorerro fa fa-caret-right" id="indicatorerro_'.$category->id.'" aria-hidden="true" style="color: silver;"></i> '.$category->name.'
 							</a>
 						</h3>
@@ -256,15 +275,13 @@ if($newcmid){
 // Duplicate the module.
         $newcourse = $DB->get_record('course', array('id' => $course_id), '*', MUST_EXIST);
 
-
         $newcm = duplicate_modulebac($newcourse, $cm,'');
-//redirect(course_get_url($course, $cm->sectionnum, array('sr' => $sectionreturn)));
+
     }
 
     purge_all_caches();
     $actual_link = new moodle_url('/course/view.php?id='.$cm->course);
     redirect($actual_link, '', null, \core\output\notification::NOTIFY_SUCCESS);
-//    redirect($actual_link, 'There is no Assignment in the Course');
 }
 echo $OUTPUT->footer();
 ?>
@@ -326,14 +343,9 @@ echo $OUTPUT->footer();
            .toggleClass('fa-caret-down fa-caret-right');
 
    }
-        // $('.accordion').on('hidden.bs.collapse', toggleChevron);
-        // $('.accordion').on('shown.bs.collapse', toggleChevron);
-
 
         function get_action_url(name, args)
         {
-
-
 
             var url = M.cfg.wwwroot + '/blocks/bulkactivity/' + name + '.php';
             if (args)
@@ -420,18 +432,11 @@ echo $OUTPUT->footer();
                 data : {'request':'getcagegorycourse',categoryid:categoryid,currentcourseid:currentcourseid,checked:checked},// Added checked: checked
                 success: function(data){
                     $('#categorycourses_'+coursediv).html(data);
-                    // $('#category_'+coursediv).removeClass("categorydiv");
-
-
-
 
                 }
             });
 
         });
-
-
-
 
 </script>
 

@@ -24,7 +24,6 @@
 $string['pluginname'] = 'Bulk Activity Creation';
 $string['bulkactivity'] = 'Bulk Activity';
 $string['bulkactivity:addinstance'] = 'Add a new Bulk Activity Creation block';
-
 $string['createactivityincourses'] = 'Create Activity in Courses';
-$string['confirm_copy'] = 'Are you sure';
+$string['confirm_copy'] = 'Are you sure?';
 $string['courselistheader'] = 'Select Courses to copy activity to ';
