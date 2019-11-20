@@ -76,10 +76,7 @@ class block_bulkactivity extends block_base
 
 		$html = "";
 
-		$this->page->requires->css('/blocks/bulkactivity/styles.css');
-		if ($this->is_special_version()) {
-			$this->page->requires->css('/blocks/bulkactivity/custom.css');
-		}
+//		$this->page->requires->css('/blocks/bulkactivity/styles.css');
 
         $this->page->requires->jquery();
 		$this->page->requires->js('/blocks/bulkactivity/script.js?v=' . time());

@@ -10,22 +10,25 @@ $PAGE->set_url($CFG->wwwroot . "/blocks/bulkactivity/createbulkactivity.php");
 
 $PAGE->requires->jquery();
 
+$PAGE->requires->css('/blocks/bulkactivity/styles.css');
 
 echo $OUTPUT->header();
 if(!isset($_POST['createduplicate'])) {
     global $USER, $DB;
     $modid = $_REQUEST["cba"];
     $cmid = required_param('cba', PARAM_INT);
-
     $sectionreturn = optional_param('sr', null, PARAM_INT);
     $sql="select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =0";
     $categories =$DB->get_records_sql($sql);
 
     $cm = get_coursemodule_from_id('', $modid, 0, true, MUST_EXIST);
 
+    $context = context_course::instance($cm->course);
+    if (!has_capability('block/bulkactivity:addinstance', $context))
+    die();
+
     function courselist($category,$course){
         global $DB;
-
         $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category";
         $courses = $DB->get_records_sql($sql);
         $courselist = "";
@@ -40,39 +43,14 @@ if(!isset($_POST['createduplicate'])) {
     }
   ?>
 
-    <style>
-        .h3, h3 {
-            font-size: 1.640625em;
-            margin: 15px 0px 5px 0px!important;
-}
-.custom-control-input{
-    position: relative !important;
-}
-h3 a, custom-control-label {
-    font-size: .75em;
-    font-weight: ;
-    color: #005A9A;
-    font-family: "Source Sans Pro","Helvetica Neue",Arial,sans-serif;
-    font-weight: 400;
-}
-        .fa {
-            font-size: 20px!important;
-            color:#999999!important;
-        }
-
-        .form-row {
-            margin-left: 22px!important;
-            text-transform: uppercase!important;
-            color: #005A9A;
-        }
-
-</style>
 <!--    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script>-->
     <div class="container">
+
         <input type="hidden" id="currentcourseid" value="<?=$cm->course?>">
-        <h3><?=get_string('courselistheader','block_bulkactivity')?></h3>
+        <h3 class="categoryname"><?=get_string('courselistheader','block_bulkactivity')?></h3>
         <form action="createbulkactivities.php" method="post" id="bulkactform">
         <?php
+        echo '<div id="blkh3">';
         echo '<div id="accordion" class="accordion panel-group">
 
 				<div class="panel-body" >';
@@ -83,7 +61,7 @@ h3 a, custom-control-label {
 						<h3 class="panel-title categoryname" style="font-weight: 100">
                             <input type="checkbox" class="checkall" id="checkall_'.$category->id.'" value="1">&nbsp;
                             <a data-toggle="collapse"    aria-expanded="true" aria-controls="collapse_'.$category->id.'"  href="#collapse_'.$category->id.'">
-								<i class="indicator indicatorerro fa fa-caret-right" id="indicatorerro_'.$category->id.'" aria-hidden="true" style="color: silver;"></i> '.$category->name.'
+								<i class="indicator indicatorerro fa fa-caret-right" id="indicatorerro_'.$category->id.'" aria-hidden="true" ></i> '.$category->name.'
 							</a>
 						</h3>
 					</div>
@@ -95,12 +73,16 @@ h3 a, custom-control-label {
          </div>
 					</div></div>';
         }
+
         echo '</div></div>';
+
         ?>
             <input type="hidden" name="cmid" value="<?=$cmid?>">
             <input type="submit" class="btn btn-primary" value="<?=get_string("submit")?>" name="createduplicate" style="margin-top: 30px;">
+        </div>
         </form>
     </div>
+
 
 
 <?php

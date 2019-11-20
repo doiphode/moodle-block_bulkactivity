@@ -24,15 +24,15 @@ function courselist($category,$course,$checked){ // Added ,$checked
             $courselist .= ' <div class="panel panel-default " >
                         <div class="panel-heading categorydiv" id="category_' . $category.'_'.$chidld->id.'" >
 
-						<h3 class="panel-title categoryname" style="font-weight: 100">
-                           <input type="checkbox" value="1" id="checkall_' . $category.'_'.$chidld->id.'" class="checkall">
-                           <a data-toggle="collapse"    aria-expanded="true" aria-controls="collapse_' . $category.'_'.$chidld->id.'"  href="#collapse_' . $category.'_'.$chidld->id.'">
-								<i class="indicator indicatorerro'.$category.$chidld->id.' fa fa-caret-right"  id="indicatorerro_' . $category.''.$chidld->id.'" aria-hidden="true" style="color: silver;"></i> ' . $chidld->name . '
+						<h3 class="panel-title categoryname">
+                            <input type="checkbox" value="1" id="checkall_' . $category.'_'.$chidld->id.'" class="checkall">
+                            <a data-toggle="collapse"    aria-expanded="true" aria-controls="collapse_' . $category.'_'.$chidld->id.'"  href="#collapse_' . $category.'_'.$chidld->id.'">
+								<i class="indicator indicatorerro'.$category.$chidld->id.' fa fa-caret-right"  id="indicatorerro_' . $category.''.$chidld->id.'" aria-hidden="true" ></i> ' . $chidld->name . '
 							</a>
 						</h3>
 					</div>
-                        <div id="collapse_' . $category.'_'.$chidld->id.'" class="collapse collapsesubcat'.$category.'"  data-parent="#accordion_'.$category.'" style="padding-left: 15px;padding-right: 15px;">
-                        <div class="card-body" style="padding: 0px;">
+                        <div id="collapse_' . $category.'_'.$chidld->id.'" class="collapse collapsesubcat'.$category.'"  data-parent="#accordion_'.$category.'">
+                        <div class="card-body">
                              <div class="form-row checkbox-group required categorycourses" id="categorycourses_' . $category.'_'.$chidld->id.'" >
                          
              </div>
@@ -56,7 +56,7 @@ if($request['request'] == 'getcagegorycourse'){
 
     $categoryid = $request['categoryid'];
     $currentcourseid = $request['currentcourseid'];
-    $checked = $_POST['checked']; 
+    $checked = $_POST['checked'];
 
  echo   courselist($categoryid,$currentcourseid,$checked);// Added ,$checked
 exit;
