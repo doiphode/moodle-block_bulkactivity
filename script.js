@@ -14,66 +14,54 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- *  Bulk Activity Creation
+ * Bulk Activity Creation
  *
- *  @package    block_bulkactivity
- *  @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package block_bulkactivity
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require(['jquery'], function ($)
-{
-    $(document).ready(function()
-    {
+require(['jquery'], function ($) {
+    $(document).ready(function () {
 
-
-        /** @var {Object}  The icon configurations */
+        // @var {Object}  The icon configurations
         var icon = {
-            // actions
-            'createactivityincourses'  : { css: 'editing_backup' , pix: 'i/twoway'  },
+            'createactivityincourses': {css: 'editing_backup', pix: 'i/twoway'},
         };
 
-        /** @var {Node}  The Bulk Activity block container node */
+        // @var {Node}  The Bulk Activity block container node
         var $block = $('.block_bulkactivity');
 
         var $spinner_modal = {
-            show: function()
-            {
+            show: function () {
                 $('#bulkactivity-spinner-modal').show();
             },
-            hide: function()
-            {
+            hide: function () {
                 $('#bulkactivity-spinner-modal').hide();
             }
         };
 
-
         /**
-         *  Returns a localized string
+         * Returns a localized string
          *
-         *  @param {String} identifier
-         *  @return {String}
+         * @param {String} identifier
+         * @return {String}
          */
-        function str(identifier)
-        {
+        function str(identifier) {
             return M.str.block_bulkactivity[identifier] || M.str.moodle[identifier];
         }
 
         /**
-         *  Shows an error message with given Ajax error
+         * Shows an error message with given Ajax error
          *
-         *  @param {Object} response  The Ajax response
+         * @param {Object} response  The Ajax response
          */
-        function show_error(response)
-        {
-            try
-            {
+        function show_error(response) {
+            try {
                 var ex = JSON.parse(response.responseText);
                 new M.core.exception({
                     name: str('pluginname') + ' - ' + str('error'),
                     message: ex.message
                 });
-            }
-            catch (e)
-            {
+            } catch (e) {
                 new M.core.exception({
                     name: str('pluginname') + ' - ' + str('error'),
                     message: response.responseText
@@ -82,20 +70,17 @@ require(['jquery'], function ($)
         }
 
         /**
-         *  Get an action URL
+         * Get an action URL
          *
-         *  @param {String} name   The action name
-         *  @param {Object} [args] The action parameters
-         *  @return {String}
+         * @param {String} name   The action name
+         * @param {Object} [args] The action parameters
+         * @return {String}
          */
-        function get_action_url(name, args)
-        {
+        function get_action_url(name, args) {
             var url = M.cfg.wwwroot + '/blocks/bulkactivity/' + name + '.php';
-            if (args)
-            {
+            if (args) {
                 var q = [];
-                for (var k in args)
-                {
+                for (var k in args) {
                     q.push(k + '=' + encodeURIComponent(args[k]));
                 }
                 url += '?' + q.join('&');
@@ -104,24 +89,20 @@ require(['jquery'], function ($)
         }
 
         /**
-         *  Check special layout (theme boost)
+         * Check special layout (theme boost)
          *
-         *  @return {Boolean}
+         * @return {Boolean}
          */
-        function verify_layout()
-        {
+        function verify_layout() {
             var menuelement = $block.find('.menubar .dropdown .dropdown-menu');
             return (menuelement.length);
         }
 
-
-        function create_command(name, pix)
-        {
+        function create_command(name, pix) {
             var imageelement = $('<img class="iconsmall "/>')
                 .attr('alt', str(name))
                 .attr('src', M.util.image_url(pix || icon[name].pix));
-            if (verify_layout())
-            {
+            if (verify_layout()) {
                 imageelement.addClass('iconcustom');
             }
 
@@ -132,13 +113,12 @@ require(['jquery'], function ($)
         }
 
         /**
-         *  Create a command icon for moodle 3.2
+         * Create a command icon for moodle 3.2
          *
-         *  @param {String} name  The command name, predefined in icon
-         *  @param {String} [pix] The icon pix name to override
+         * @param {String} name  The command name, predefined in icon
+         * @param {String} [pix] The icon pix name to override
          */
-        function create_special_activity_command(name, pix)
-        {
+        function create_special_activity_command(name, pix) {
             return $('<a href="javascript:void(0)"/>')
                 .addClass(icon[name].css)
                 .addClass('dropdown-item menu-action cm-edit-action')
@@ -155,265 +135,153 @@ require(['jquery'], function ($)
          * @param $node
          * @returns {*|jQuery}
          */
-        function add_spinner($node)
-        {
-            var WAITICON = {'pix':"i/loading_small",'component':'moodle'};
+        function add_spinner($node) {
+            var WAITICON = {'pix': 'i/loading_small', 'component': 'moodle'};
 
-            if($node.find(".spinner").length)
-            {
-                return $node.find(".spinner");
+            if ($node.find('.spinner').length) {
+                return $node.find('.spinner');
             }
 
-            var spinner = $("<img/>").attr("src", M.util.image_url(WAITICON.pix, WAITICON.component))
-                .addClass("spinner iconsmall")
+            var spinner = $('<img/>').attr('src', M.util.image_url(WAITICON.pix, WAITICON.component))
+                .addClass('spinner iconsmall')
                 .hide();
 
             $node.append(spinner);
             return spinner;
         }
 
+        function backup(cmid, userdata) {
 
-
-        function backup(cmid, userdata)
-        {
-
-            window.location.href =  M.cfg.wwwroot+"/blocks/bulkactivity/createbulkactivities.php?cba="+cmid;
+            window.location.href = M.cfg.wwwroot + '/blocks/bulkactivity/createbulkactivities.php?cba=' + cmid;
         }
 
+        $.get_plugin_name = function () {
+            var $blockheader = $block.find('h2');
 
+            if (!$blockheader.length) {
+                $blockheader = $block.find('h3');
 
-        $.get_plugin_name = function()
-        {
-            var $blockheader = $block.find("h2");
-
-            if(!$blockheader.length)
-            {
-                $blockheader = $block.find("h3");
-
-                if($blockheader.length)
-                {
+                if ($blockheader.length) {
                     return $blockheader.html();
                 }
-            }
-            else
-            {
+            } else {
                 return $blockheader.html();
             }
 
-            return "";
+            return '';
         };
 
-        $.on_backup = function (e)
-        {
-            var cmid = (function ($backup)
-            {
+        $.on_backup = function (e) {
+            var cmid = (function ($backup) {
                 var $activity = $backup.closest('li.activity');
-                if ($activity.length)
-                {
+                if ($activity.length) {
                     return $activity.attr('id').match(/(\d+)$/)[1];
                 }
                 var $commands = $backup.closest('.commands');
                 var dataowner = $commands.attr('data-owner');
-                if (dataowner.length)
-                {
+                if (dataowner.length) {
                     return dataowner.match(/(\d+)$/)[1];
                 }
                 return $commands.find('a.editing_delete').attr('href').match(/delete=(\d+)/)[1];
             })($(e.target));
 
-            (function (on_success)
-            {
+            (function (on_success) {
                 $.post(get_action_url('rest'),
                     {
-                        "action": "is_userdata_copyable",
-                        "cmid": cmid
+                        'action': 'is_userdata_copyable',
+                        'cmid': cmid
                     },
-                function(response)
-                {
-                    on_success(response);
-                }, "text")
-                    .fail(function(response)
-                    {
-                       show_error(response);
+                    function (response) {
+                        on_success(response);
+                    }, 'text')
+                    .fail(function (response) {
+                        show_error(response);
                     });
-            })(function (response)
-            {
-                function embed_cmid(cmid)
-                {
+            })(function (response) {
+                function embed_cmid(cmid) {
                     return '<!-- #cmid=' + cmid + ' -->';
                 }
 
-                function parse_cmid(question)
-                {
+                function parse_cmid(question) {
                     return /#cmid=(\d+)/.exec(question)[1];
                 }
 
                 var copyable = response === '1';
-                if (copyable)
-                {
-                    if(confirm(str('confirm_userdata')))
-                    {
-                        if(confirm(str('confirm_copy')))
-                        {
+                if (copyable) {
+                    if (confirm(str('confirm_userdata'))) {
+                        if (confirm(str('confirm_copy'))) {
                             backup(cmid, true);
                         }
-                    }
-                    else
-                    {
-                        if(confirm(str('confirm_copy')))
-                        {
+                    } else {
+                        if (confirm(str('confirm_copy'))) {
                             backup(cmid, false);
                         }
                     }
-                }
-                else
-                {
-                    if(confirm(str('confirm_copy')))
-                    {
+                } else {
+                    if (confirm(str('confirm_copy'))) {
                         backup(cmid, false);
                     }
                 }
             });
         };
 
+        $.init_activity_commands = function () {
+            function add_backup_comand($activity) {
+                var $menu = $activity.find('ul[role=\'menu\']');
 
-
-        $.init_activity_commands = function()
-        {
-            function add_backup_comand($activity)
-            {
-                var $menu = $activity.find("ul[role='menu']");
-
-                if($menu.length)
-                {
+                if ($menu.length) {
                     var li = $menu.find('li').first().clone();
-                    var $backup = li.find('a').attr('title', str('createactivityincourses','block_bulkactivity')).attr('href', 'javascript:void(0)');
+                    var $backup = li.find('a').attr('title', str('createactivityincourses', 'block_bulkactivity')).attr('href', 'javascript:void(0)');
                     var img = li.find('img');
 
                     if (img.length) {
-                        li.find('img').attr('alt', str('createactivityincourses','block_bulkactivity')).attr('title', str('createactivityincourses','block_bulkactivity')).attr('src', M.util.image_url(icon['backup'].pix));
+                        li.find('img').attr('alt', str('createactivityincourses', 'block_bulkactivity')).attr('title', str('createactivityincourses', 'block_bulkactivity')).attr('src', M.util.image_url(icon.backup.pix));
                     } else {
-                        li.find('i').attr('class', 'icon fa fa-upload').attr('title', str('createactivityincourses','block_bulkactivity')).attr('aria-label', str('createactivityincourses','block_bulkactivity'));
+                        li.find('i').attr('class', 'icon fa fa-upload').attr('title', str('createactivityincourses', 'block_bulkactivity')).attr('aria-label', str('createactivityincourses', 'block_bulkactivity'));
                     }
 
-                    //li.find('span').html(str('backup'));
                     li.find('span').html('Create Bulk Activity');
                     $menu.append(li);
 
-                }
-                else
-                {
-                    var $backup = create_command("createactivityincourses");
+                } else {
+                    var $backup = create_command('createactivityincourses');
                     $menu = $activity.find('div[role="menu"]');
-                    if($menu.length)
-                    {
-                        $backup = create_special_activity_command("createactivityincourses");
-                        $menu.append($backup.attr("role", "menuitem"));
-                        if($menu.css("display") === "none")
-                        {
-                            $backup.append($("<span class='menu-action-text'/>").append($backup.attr('title')));
+                    if ($menu.length) {
+                        $backup = create_special_activity_command('createactivityincourses');
+                        $menu.append($backup.attr('role', 'menuitem'));
+                        if ($menu.css('display') === 'none') {
+                            $backup.append($('<span class=\'menu-action-text\'/>').append($backup.attr('title')));
                         }
 
-                    }
-                    else
-                    {
-                        $activity.find(".commands").append($backup);
+                    } else {
+                        $activity.find('.commands').append($backup);
                     }
                 }
 
-                $backup.click(function(e)
-                {
+                $backup.click(function (e) {
                     $.on_backup(e);
                 });
             }
 
-            if(course.is_frontpage)
-            {
-                $(".sitetopic li.activity").each(function()
-                {
+            if (course.is_frontpage) {
+                $('.sitetopic li.activity').each(function () {
                     add_backup_comand($(this));
                 });
-                $(".block_site_main_menu .content > ul > li").each(function()
-                {
+                $('.block_site_main_menu .content > ul > li').each(function () {
                     add_backup_comand($(this));
                 });
-            }
-            else
-            {
-                $(".course-content li.activity").each(function()
-                {
+            } else {
+                $('.course-content li.activity').each(function () {
                     add_backup_comand($(this));
                 });
             }
-
-            // $("li.section").each(function()
-            // {
-            //     var sectionID = $(this).find("div.content h3.sectionname span.inplaceeditable").attr("data-itemid");
-            //
-            //     var $menu = $(this).find("ul[role='menu']").first();
-            //
-            //     if($menu.length)
-            //     {
-            //         var li = $menu.find('li').first().clone();
-            //         var img = li.find('img');
-            //
-            //         if (img.length) {
-            //             img.attr('alt', str('createactivityincourses','block_bulkactivity')).attr('title', str('createactivityincourses','block_bulkactivity')).attr('src', M.util.image_url(icon['backup'].pix, null));
-            //         } else {
-            //             li.find('i').attr('class', 'icon fa fa-upload').attr('title', str('createactivityincourses','block_bulkactivity')).attr('aria-label', str('createactivityincourses','block_bulkactivity'));
-            //         }
-            //
-            //         li.find('span').html(str('createactivityincourses','block_bulkactivity'));
-            //         li.find('a').attr('href', 'javascript:void(0)');
-            //
-            //         $menu.append(li);
-            //
-            //         li.find('a').click(function()
-            //         {
-            //             $.on_section_backup(sectionID);
-            //         });
-            //     }
-            //     else
-            //     {
-            //         $menu = $(this).find("div[role='menu']").first();
-            //
-            //         var $backup = null;
-            //
-            //         if($menu.length)
-            //         {
-            //             $backup = create_special_activity_command("createactivityincourses");
-            //
-            //             $menu.append($backup.attr("role", "menuitem"));
-            //
-            //             if($menu.css("display") === "none")
-            //             {
-            //              //   $backup.append($("<span class='menu-action-text'/>").append($backup.attr('title')));
-            //             }
-            //             // if($menu.find("i.fa"))
-            //             // {
-            //                 // $backup.find("img").replaceWith($("<i class='fa fa-cloud-download icon'/>"));
-            //             // }
-            //         }
-            //         else
-            //         {
-            //             $backup = create_command("createactivityincourses");
-            //             $activity.find(".commands").append($backup);
-            //         }
-            //
-            //         $backup.click(function ()
-            //         {
-            //             $.on_section_backup(sectionID);
-            //         });
-            //     }
-            // });
         };
 
         /**
          * Initialize the Bulk Activity Block
          */
-        $.init = function()
-        {
-            M.str.block_bulkactivity['pluginname'] = this.get_plugin_name();
+        $.init = function () {
+            M.str.block_bulkactivity.pluginname = this.get_plugin_name();
 
             $.init_activity_commands();
         };
@@ -424,16 +292,8 @@ require(['jquery'], function ($)
 
         $.init();
 
-
-
-
-
-
-
-
     });
 
-    
 });
 
 

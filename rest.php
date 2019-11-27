@@ -15,12 +15,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- *  Bulk Activity Creation
- *
- *  @package    block_bulkactivity
- *  @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Bulk Activity Creation
+ * @package    block_bulkactivity
+ * @copyright  2019 Queen Mary University of London
+ * @author     Shubhendra R Doiphode <doiphode.sunny@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require_once '../../config.php';
+require_once(dirname(dirname(__FILE__)) . '../../config.php');
 echo "test";
 exit;

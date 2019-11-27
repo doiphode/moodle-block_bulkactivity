@@ -1,17 +1,21 @@
-#blkh3 .custom-control-input{
+#blkh3 .custom-control-input {
     position: relative !important;
 }
+
 #blkh3 .form-row {
-    margin-left: 22px!important;
+    margin-left: 22px !important;
 }
+
 #blkh3 .collapsesubcat {
     padding-left: 15px;
     padding-right: 15px;
 }
+
 #blkh3 .card-body {
     padding: 0px;
 }
+
 #blkh3 a {
     font-size: .75em;
-    font-weight:400;
+    font-weight: 400;
 }

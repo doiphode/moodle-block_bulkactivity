@@ -15,15 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- *  Bulk Activity Creation
- *
- *  @package    block_bulkactivity
- *  @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Bulk Activity Creation
+ * @package    block_bulkactivity
+ * @copyright  2019 Queen Mary University of London
+ * @author     Shubhendra R Doiphode <doiphode.sunny@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
+defined('MOODLE_INTERNAL') || die();
 
-$plugin->version   = 2019012001;
-$plugin->requires  = 2017050500; // Moodle 3.3
+$plugin->version = 2019012001;
+$plugin->requires = 2017050500; // Moodle 3.3.
 $plugin->component = 'block_bulkactivity';
-$plugin->release   = '3.6, release 1';
+$plugin->release = '3.6, release 1';

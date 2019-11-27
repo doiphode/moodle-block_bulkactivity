@@ -15,15 +15,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- *  Bulk Activity Creation
- *
- *  @package    block_bulkactivity
- *  @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * Bulk Activity Creation
+ * @package    block_bulkactivity
+ * @copyright  2019 Queen Mary University of London
+ * @author     Shubhendra R Doiphode <doiphode.sunny@gmail.com>
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $string['pluginname'] = 'Bulk Activity Creation';
 $string['bulkactivity'] = 'Bulk Activity';
 $string['bulkactivity:addinstance'] = 'Add a new Bulk Activity Creation block';
-$string['createactivityincourses'] = 'Create Activity in Courses';
+$string['createactivityincourses'] = 'Bulk Copy to Courses';
 $string['confirm_copy'] = 'Are you sure?';
 $string['courselistheader'] = 'Select Courses to copy activity to ';
