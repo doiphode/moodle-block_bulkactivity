@@ -77,6 +77,17 @@ if (!isset($_POST['createduplicate'])) {
         <input type="hidden" id="currentcourseid" value="<?= $cm->course ?>">
         <h3 class="categoryname"><?= get_string('courselistheader', 'block_bulkactivity') ?></h3>
         <form action="createbulkactivities.php" method="post" id="bulkactform">
+			<div class="form-group row">
+               <label for="copyactivityto" class="col-sm-2 col-form-label">Copy activity to :</label>
+               <div class="col-sm-3">
+                   <select class="custom-select mr-sm-2" id="copyactivityto" name="copyactivityto">
+                       <option value="0">Topic-0</option>
+                       <option value="1">Topic-1</option>
+                       <option value="2">Last Topic</option>
+                   </select>
+               </div>
+           </div>
+			
             <?php
             echo '<div id="blkh3">';
             echo '<div id="accordion" class="accordion panel-group">
@@ -198,8 +209,21 @@ if (isset($_POST['createduplicate'])) {
                 }
             }
 
-            if (max($empsection)) {
-                $sectionid = max($empsection);
+            if($empsection){
+                //  $sectionid = min($empsection);
+
+
+                if($_POST['copyactivityto']==0){
+                    $sectionid = min($empsection);
+                }elseif($_POST['copyactivityto']==1){
+                    $sectionid =$empsection[1];
+                }elseif ($_POST['copyactivityto']==2){
+                    $sectionid =  max($empsection);
+                }
+
+
+
+
                 $sescq = $DB->get_record('course_sections', array('id' => $sectionid), 'sequence');
                 $oldsec = $sescq->sequence;
                 $oldsecarr = explode(",", $oldsec);
