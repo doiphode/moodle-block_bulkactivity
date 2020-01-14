@@ -15,19 +15,19 @@
 
 /**
  * Bulk Activity Creation
- *
+ * @author     Shubhendra R Doiphode <doiphode.sunny@gmail.com>
  * @package block_bulkactivity
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 require(['jquery'], function ($) {
     $(document).ready(function () {
 
-        // @var {Object}  The icon configurations
+        // @var {Object}  The icon configurations.
         var icon = {
             'createactivityincourses': {css: 'editing_backup', pix: 'i/twoway'},
         };
 
-        // @var {Node}  The Bulk Activity block container node
+        // @var {Node}  The Bulk Activity block container node.
         var $block = $('.block_bulkactivity');
 
         var $spinner_modal = {
@@ -295,5 +295,3 @@ require(['jquery'], function ($) {
     });
 
 });
-
-

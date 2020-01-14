@@ -40,7 +40,6 @@ function courselist($category, $course, $checked) {
     $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category";
     $courses = $DB->get_records_sql($sql);
     $courselist = "";
-
     if (getcategories($category)) {
         $courselist .= '<div id="accordion_' . $category . '" class="accordion panel-group col-md-12">
 			<div class="panel-body" >';

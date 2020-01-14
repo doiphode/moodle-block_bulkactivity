@@ -50,7 +50,7 @@ if (!isset($_POST['createduplicate'])) {
     $cm = get_coursemodule_from_id('', $modid, 0, true, MUST_EXIST);
 
     $context = context_course::instance($cm->course);
-    if (!has_capability('block/bulkactivity:addinstance', $context)){
+    if (!has_capability('block/bulkactivity:addinstance', $context)) {
         die();
     }
 
@@ -77,17 +77,17 @@ if (!isset($_POST['createduplicate'])) {
         <input type="hidden" id="currentcourseid" value="<?= $cm->course ?>">
         <h3 class="categoryname"><?= get_string('courselistheader', 'block_bulkactivity') ?></h3>
         <form action="createbulkactivities.php" method="post" id="bulkactform">
-			<div class="form-group row">
-               <label for="copyactivityto" class="col-sm-2 col-form-label">Copy activity to :</label>
-               <div class="col-sm-3">
-                   <select class="custom-select mr-sm-2" id="copyactivityto" name="copyactivityto">
-                       <option value="0">Section 0</option>
-                       <option value="1">Section 1</option>
-                       <option value="2">Last Section</option>
-                   </select>
-               </div>
-           </div>
-			
+            <div class="form-group row">
+                <label for="copyactivityto" class="col-sm-2 col-form-label">Copy activity to :</label>
+                <div class="col-sm-3">
+                    <select class="custom-select mr-sm-2" id="copyactivityto" name="copyactivityto">
+                        <option value="0">Section 0</option>
+                        <option value="1">Section 1</option>
+                        <option value="2">Last Section</option>
+                    </select>
+                </div>
+            </div>
+
             <?php
             echo '<div id="blkh3">';
             echo '<div id="accordion" class="accordion panel-group">
@@ -209,19 +209,15 @@ if (isset($_POST['createduplicate'])) {
                 }
             }
 
-            if($empsection){
-                //  $sectionid = min($empsection);
-
-
-                if($_POST['copyactivityto']==0){
+            if ($empsection) {
+               
+                if ($_POST['copyactivityto'] == 0) {
                     $sectionid = min($empsection);
-                }elseif($_POST['copyactivityto']==1){
-                    $sectionid =$empsection[1];
-                }elseif ($_POST['copyactivityto']==2){
-                    $sectionid =  max($empsection);
+                } elseif ($_POST['copyactivityto'] == 1) {
+                    $sectionid = $empsection[1];
+                } elseif ($_POST['copyactivityto'] == 2) {
+                    $sectionid = max($empsection);
                 }
-
-
 
 
                 $sescq = $DB->get_record('course_sections', array('id' => $sectionid), 'sequence');
@@ -259,7 +255,6 @@ if (isset($_POST['createduplicate'])) {
             // Add ' (copy)' to duplicates. Note we don't cleanup or validate lengths here. It comes
             // from original name that was valid, so the copy should be too.
             // $newname = get_string('duplicatedmodule', 'moodle', $newcm->name);
-            // $DB->set_field($cm->modname, 'name', $newname, ['id' => $newcm->instance]);
             $section = $DB->get_record('course_sections', array('id' => $cm->section, 'course' => $cm->course));
             $modarray = explode(",", trim($section->sequence));
             $cmindex = array_search($cm->id, $modarray);
@@ -283,7 +278,7 @@ if (isset($_POST['createduplicate'])) {
         $modcontext = context_module::instance($cm->id);
         require_capability('moodle/course:manageactivities', $modcontext);
 
-// Duplicate the module.
+        // Duplicate the module.
         $newcourse = $DB->get_record('course', array('id' => $course_id), '*', MUST_EXIST);
 
         $newcm = duplicate_modulebac($newcourse, $cm, '');
