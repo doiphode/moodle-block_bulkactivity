@@ -81,9 +81,9 @@ if (!isset($_POST['createduplicate'])) {
                <label for="copyactivityto" class="col-sm-2 col-form-label">Copy activity to :</label>
                <div class="col-sm-3">
                    <select class="custom-select mr-sm-2" id="copyactivityto" name="copyactivityto">
-                       <option value="0">Topic-0</option>
-                       <option value="1">Topic-1</option>
-                       <option value="2">Last Topic</option>
+                       <option value="0">Section 0</option>
+                       <option value="1">Section 1</option>
+                       <option value="2">Last Section</option>
                    </select>
                </div>
            </div>
