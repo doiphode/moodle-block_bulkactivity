@@ -210,7 +210,7 @@ if (isset($_POST['createduplicate'])) {
             }
 
             if ($empsection) {
-               
+
                 if ($_POST['copyactivityto'] == 0) {
                     $sectionid = min($empsection);
                 } elseif ($_POST['copyactivityto'] == 1) {

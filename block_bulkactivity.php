@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * The bulk activity creation block class
  */
-class block_bulkactivity extends block_base{
+class block_bulkactivity extends block_base {
     public function init() {
         $this->title = get_string('pluginname', __CLASS__);
         $this->version = 2015012700;
@@ -45,8 +45,7 @@ class block_bulkactivity extends block_base{
         );
     }
 
-    public function instance_can_be_docked()
-    {
+    public function instance_can_be_docked() {
         return false; // AJAX won't work with Dock.
     }
 
