@@ -24,7 +24,7 @@ require(['jquery'], function ($) {
 
         // @var {Object}  The icon configurations.
         var icon = {
-            'createactivityincourses': {css: 'editing_backup', pix: 'i/twoway'},
+            'createactivityincourses': {css: 'editing_backupbulk', pix: 'i/twoway'},
         };
 
         // @var {Node}  The Bulk Activity block container node.
@@ -150,7 +150,7 @@ require(['jquery'], function ($) {
             return spinner;
         }
 
-        function backup(cmid, userdata) {
+        function backupbulk(cmid, userdata) {
 
             window.location.href = M.cfg.wwwroot + '/blocks/bulkactivity/createbulkactivities.php?cba=' + cmid;
         }
@@ -171,13 +171,13 @@ require(['jquery'], function ($) {
             return '';
         };
 
-        $.on_backup = function (e) {
-            var cmid = (function ($backup) {
-                var $activity = $backup.closest('li.activity');
+        $.on_backupbulk = function (e) {
+            var cmid = (function ($backupbulk) {
+                var $activity = $backupbulk.closest('li.activity');
                 if ($activity.length) {
                     return $activity.attr('id').match(/(\d+)$/)[1];
                 }
-                var $commands = $backup.closest('.commands');
+                var $commands = $backupbulk.closest('.commands');
                 var dataowner = $commands.attr('data-owner');
                 if (dataowner.length) {
                     return dataowner.match(/(\d+)$/)[1];
@@ -210,32 +210,32 @@ require(['jquery'], function ($) {
                 if (copyable) {
                     if (confirm(str('confirm_userdata'))) {
                         if (confirm(str('confirm_copy'))) {
-                            backup(cmid, true);
+                            backupbulk(cmid, true);
                         }
                     } else {
                         if (confirm(str('confirm_copy'))) {
-                            backup(cmid, false);
+                            backupbulk(cmid, false);
                         }
                     }
                 } else {
                     if (confirm(str('confirm_copy'))) {
-                        backup(cmid, false);
+                        backupbulk(cmid, false);
                     }
                 }
             });
         };
 
         $.init_activity_commands = function () {
-            function add_backup_comand($activity) {
+            function add_backupbulk_comand($activity) {
                 var $menu = $activity.find('ul[role=\'menu\']');
 
                 if ($menu.length) {
                     var li = $menu.find('li').first().clone();
-                    var $backup = li.find('a').attr('title', str('createactivityincourses', 'block_bulkactivity')).attr('href', 'javascript:void(0)');
+                    var $backupbulk = li.find('a').attr('title', str('createactivityincourses', 'block_bulkactivity')).attr('href', 'javascript:void(0)');
                     var img = li.find('img');
 
                     if (img.length) {
-                        li.find('img').attr('alt', str('createactivityincourses', 'block_bulkactivity')).attr('title', str('createactivityincourses', 'block_bulkactivity')).attr('src', M.util.image_url(icon.backup.pix));
+                        li.find('img').attr('alt', str('createactivityincourses', 'block_bulkactivity')).attr('title', str('createactivityincourses', 'block_bulkactivity')).attr('src', M.util.image_url(icon.backupbulk.pix));
                     } else {
                         li.find('i').attr('class', 'icon fa fa-upload').attr('title', str('createactivityincourses', 'block_bulkactivity')).attr('aria-label', str('createactivityincourses', 'block_bulkactivity'));
                     }
@@ -244,35 +244,35 @@ require(['jquery'], function ($) {
                     $menu.append(li);
 
                 } else {
-                    var $backup = create_command('createactivityincourses');
+                    var $backupbulk = create_command('createactivityincourses');
                     $menu = $activity.find('div[role="menu"]');
                     if ($menu.length) {
-                        $backup = create_special_activity_command('createactivityincourses');
-                        $menu.append($backup.attr('role', 'menuitem'));
+                        $backupbulk = create_special_activity_command('createactivityincourses');
+                        $menu.append($backupbulk.attr('role', 'menuitem'));
                         if ($menu.css('display') === 'none') {
-                            $backup.append($('<span class=\'menu-action-text\'/>').append($backup.attr('title')));
+                            $backupbulk.append($('<span class=\'menu-action-text\'/>').append($backupbulk.attr('title')));
                         }
 
                     } else {
-                        $activity.find('.commands').append($backup);
+                        $activity.find('.commands').append($backupbulk);
                     }
                 }
 
-                $backup.click(function (e) {
-                    $.on_backup(e);
+                $backupbulk.click(function (e) {
+                    $.on_backupbulk(e);
                 });
             }
 
             if (course.is_frontpage) {
                 $('.sitetopic li.activity').each(function () {
-                    add_backup_comand($(this));
+                    add_backupbulk_comand($(this));
                 });
                 $('.block_site_main_menu .content > ul > li').each(function () {
-                    add_backup_comand($(this));
+                    add_backupbulk_comand($(this));
                 });
             } else {
                 $('.course-content li.activity').each(function () {
-                    add_backup_comand($(this));
+                    add_backupbulk_comand($(this));
                 });
             }
         };

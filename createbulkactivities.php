@@ -28,10 +28,21 @@ defined('MOODLE_INTERNAL') || die();
 
 global $PAGE, $CFG, $DB, $OUTPUT;
 $PAGE->set_context(context_system::instance());
+
+$modid = $_REQUEST["cba"];
+$cm = get_coursemodule_from_id('', $modid, 0, true, MUST_EXIST);
+
+$context = context_course::instance($cm->course);
+if(!has_capability('block/bulkactivity:addinstance', $context)){
+    echo get_string('unauthorizedaccesss','block_bulkactivity');
+    die();
+}
+
+
 $PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string("pluginname", "block_bulkactivity"));
 $PAGE->set_heading(get_string("pluginname", "block_bulkactivity"));
-$PAGE->navbar->ignore_active();
+//$PAGE->navbar->ignore_active();
 $PAGE->set_url($CFG->wwwroot . "/blocks/bulkactivity/createbulkactivity.php");
 
 $PAGE->requires->jquery();
@@ -39,6 +50,9 @@ $PAGE->requires->jquery();
 $PAGE->requires->css('/blocks/bulkactivity/styles.css');
 
 echo $OUTPUT->header();
+
+
+
 if (!isset($_POST['createduplicate'])) {
     global $USER, $DB;
     $modid = $_REQUEST["cba"];
@@ -289,7 +303,10 @@ if (isset($_POST['createduplicate'])) {
     $actual_link = new moodle_url('/course/view.php?id=' . $cm->course);
     redirect($actual_link, '', null, \core\output\notification::NOTIFY_SUCCESS);
 }
+
+
 echo $OUTPUT->footer();
+
 ?>
 <script>
 
