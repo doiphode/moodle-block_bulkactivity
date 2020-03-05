@@ -25,6 +25,7 @@ require(['jquery'], function ($) {
         // @var {Object}  The icon configurations.
         var icon = {
             'createactivityincourses': {css: 'editing_backupbulk', pix: 'i/twoway'},
+            'backupbulk': {css: 'editing_backupbulk', pix: 'i/twoway'},
         };
 
         // @var {Node}  The Bulk Activity block container node.

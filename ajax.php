@@ -29,16 +29,48 @@ defined('MOODLE_INTERNAL') || die();
 $request = $_REQUEST;
 
 function getcategories($parentid) {
-    global $DB;
-    $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =$parentid";
-    return $categories = $DB->get_records_sql($sql);
+    global $DB,$USER;
+    $usercourses = enrol_get_users_courses($USER->id, true, Null, 'visible DESC,sortorder ASC');
+    $encatarray =array();
+    $coursearray = array();
+
+    foreach($usercourses as $course){
+        $encatarray[] = $course->category;
+        $coursearray[] =  $course->id;
+    }
+    $catstr = implode(",",$encatarray);
+
+    if(is_siteadmin()) {
+        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =$parentid";
+        return $categories = $DB->get_records_sql($sql);
+    }elseif(!empty($catstr)){
+        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =$parentid && id in ($catstr)";
+        return $categories = $DB->get_records_sql($sql);
+    }
+
 }
 
 function courselist($category, $course, $checked) {
-    global $DB;
+    global $DB,$USER;
+    $usercoursess = enrol_get_users_courses($USER->id, true, Null, 'visible DESC,sortorder ASC');
+    $encatarray =array();
 
-    $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category";
-    $courses = $DB->get_records_sql($sql);
+
+
+    $coursearray =  array();
+foreach($usercoursess as $cid){
+    $coursearray[] =$cid->id;
+}
+
+  $cidstr = implode(",",$coursearray);
+    if(is_siteadmin()) {
+        $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category";
+        $courses = $DB->get_records_sql($sql);
+    }elseif(!empty($cidstr)){
+        $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category && id in ($cidstr)";
+        $courses = $DB->get_records_sql($sql);
+    }
+
     $courselist = "";
     if (getcategories($category)) {
         $courselist .= '<div id="accordion_' . $category . '" class="accordion panel-group col-md-12">

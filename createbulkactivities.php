@@ -29,14 +29,17 @@ defined('MOODLE_INTERNAL') || die();
 global $PAGE, $CFG, $DB, $OUTPUT;
 $PAGE->set_context(context_system::instance());
 
-$modid = $_REQUEST["cba"];
-$cm = get_coursemodule_from_id('', $modid, 0, true, MUST_EXIST);
+if (!isset($_POST['createduplicate'])) {
+    $modid = $_REQUEST["cba"];
 
-$context = context_course::instance($cm->course);
-if(!has_capability('block/bulkactivity:addinstance', $context)){
-    echo get_string('unauthorizedaccesss','block_bulkactivity');
-    die();
+    $cm = get_coursemodule_from_id('', $modid, 0, true, MUST_EXIST);
+    $context = context_course::instance($cm->course);
+    if (!has_capability('block/bulkactivity:addinstance', $context)) {
+        echo get_string('unauthorizedaccesss', 'block_bulkactivity');
+        die();
+    }
 }
+
 
 
 $PAGE->set_pagelayout('admin');
@@ -46,6 +49,9 @@ $PAGE->set_heading(get_string("pluginname", "block_bulkactivity"));
 $PAGE->set_url($CFG->wwwroot . "/blocks/bulkactivity/createbulkactivity.php");
 
 $PAGE->requires->jquery();
+//$PAGE->requires->js( new moodle_url('https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js'),true);
+//$PAGE->requires->js( new moodle_url('https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js'),true);
+
 
 $PAGE->requires->css('/blocks/bulkactivity/styles.css');
 
@@ -55,11 +61,35 @@ echo $OUTPUT->header();
 
 if (!isset($_POST['createduplicate'])) {
     global $USER, $DB;
+
+    $usercourses = enrol_get_users_courses($USER->id, true, Null, 'visible DESC,sortorder ASC');
+    $encatarray =array();
+    $coursearray = array();
+
+    foreach($usercourses as $course){
+        $encatarray[] = $course->category;
+        $coursearray[] =  $course->id;
+    }
+
+
+
+
+    $catstr = implode(",",$encatarray);
+    $coursestr = implode(",",$coursearray);
+
+
     $modid = $_REQUEST["cba"];
     $cmid = required_param('cba', PARAM_INT);
     $sectionreturn = optional_param('sr', null, PARAM_INT);
-    $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =0";
+
+    if(is_siteadmin()){
+        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =0 ";
+    }else{
+        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =0 && id in ($catstr)";
+    }
+
     $categories = $DB->get_records_sql($sql);
+
 
     $cm = get_coursemodule_from_id('', $modid, 0, true, MUST_EXIST);
 
@@ -69,9 +99,26 @@ if (!isset($_POST['createduplicate'])) {
     }
 
     function courselist($category, $course) {
-        global $DB;
-        $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category";
-        $courses = $DB->get_records_sql($sql);
+        global $DB,$USER;
+        $usercourses = enrol_get_users_courses($USER->id, true, Null, 'visible DESC,sortorder ASC');
+        $encatarray =array();
+        $coursearray = array();
+
+
+
+        foreach($usercourses as $course){
+            $encatarray[] = $course->category;
+            $coursearray[] =  $course->id;
+        }
+        $catstr = implode(",",$encatarray);
+        if(is_siteadmin()) {
+            $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category";
+            $courses = $DB->get_records_sql($sql);
+        }elseif(!empty($catstr)){
+            $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category && category in ($catstr)";
+            $courses = $DB->get_records_sql($sql);
+        }
+
         $courselist = "";
         foreach ($courses as $course) {
             $courselist .= '<div class="col-md-6 custom-control custom-checkbox">
@@ -265,6 +312,8 @@ if (isset($_POST['createduplicate'])) {
         if ($newcmid) {
             // Proceed with activity renaming before everything else. We don't use APIs here to avoid
             // triggering a lot of create/update duplicated events.
+
+
             $newcm = get_coursemodule_from_id($cm->modname, $newcmid, $cm->course);
             // Add ' (copy)' to duplicates. Note we don't cleanup or validate lengths here. It comes
             // from original name that was valid, so the copy should be too.
