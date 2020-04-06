@@ -63,29 +63,41 @@ if (!isset($_POST['createduplicate'])) {
     global $USER, $DB;
 
     $usercourses = enrol_get_users_courses($USER->id, true, Null, 'visible DESC,sortorder ASC');
+
+
+
+
     $encatarray =array();
     $coursearray = array();
 
+   function get_parentcategory($catid){
+       global $DB;
+           $cat =   $DB->get_record('course_categories',array('id'=>$catid),'id,parent');
+            if($cat->parent !=0){
+              return    get_parentcategory($cat->parent);
+            }else{
+             return $cat->id;
+            }
+    }
+    $parentcat = array();
     foreach($usercourses as $course){
         $encatarray[] = $course->category;
+        $parentcat []  =   get_parentcategory($course->category);
         $coursearray[] =  $course->id;
     }
-
-
-
+    $parentcat = array_unique($parentcat);
 
     $catstr = implode(",",$encatarray);
     $coursestr = implode(",",$coursearray);
-
-
+    $parentcatstr = implode(",",$parentcat);
     $modid = $_REQUEST["cba"];
     $cmid = required_param('cba', PARAM_INT);
     $sectionreturn = optional_param('sr', null, PARAM_INT);
 
     if(is_siteadmin()){
-        $sql = "select id,name from {course_categories} where coursecount >= 0 and visible = 1 and parent = 0";
+        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =0 ";
     }else{
-        $sql = "select id,name from {course_categories} where coursecount >= 0 and visible = 1 and parent = 0 and id in ($catstr)";
+     $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && id in ($parentcatstr)";
     }
 
     $categories = $DB->get_records_sql($sql);
@@ -112,14 +124,11 @@ if (!isset($_POST['createduplicate'])) {
         }
         $catstr = implode(",",$encatarray);
         if(is_siteadmin()) {
-            $sql = "select id,fullname from {course} where id != :course and visible = 1 and category = :category";
-            $courses = $DB->get_records_sql($sql, ['course' => $course, 'category' => $category]);
+            $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category";
+            $courses = $DB->get_records_sql($sql);
         }elseif(!empty($catstr)){
-            list($insql, $inparams) = $DB->get_in_or_equal($encatarray);
-            $sql = "select id,fullname from {course} where id != :course and visible = 1 and category = :category and category $insql";
-            $inparams['course'] = $course;
-            $inparams['category'] = $category;
-            $courses = $DB->get_records_sql($sql, $inparams);
+            $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category && category in ($catstr)";
+            $courses = $DB->get_records_sql($sql);
         }
 
         $courselist = "";
