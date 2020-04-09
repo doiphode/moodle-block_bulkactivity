@@ -28,6 +28,17 @@ defined('MOODLE_INTERNAL') || die();
 
 $request = $_REQUEST;
 
+
+function get_parentcategory($catid){
+    global $DB;
+    $cat =   $DB->get_record('course_categories',array('id'=>$catid),'id,parent');
+    if($cat->parent !=0){
+        return    get_parentcategory($cat->parent);
+    }else{
+        return $cat->id;
+    }
+}
+
 function getcategories($parentid) {
     global $DB,$USER;
     $usercourses = enrol_get_users_courses($USER->id, true, Null, 'visible DESC,sortorder ASC');
@@ -36,17 +47,18 @@ function getcategories($parentid) {
 
     foreach($usercourses as $course){
         $encatarray[] = $course->category;
+        $parentcat []  =   get_parentcategory($course->category);
         $coursearray[] =  $course->id;
     }
+    $catstr = implode(",",$encatarray);
 
     if(is_siteadmin()) {
-        $sql = "select id,name from {course_categories} where coursecount >= 0 and visible = 1 and parent = :parentid";
-        return $categories = $DB->get_records_sql($sql, ['parentid' => $parentid]);
-    }elseif(!empty($encatarray)){
-        list($insql, $inparams) = $DB->get_in_or_equal($encatarray);
-        $sql = "select id,name from {course_categories} where coursecount >= 0 and visible = 1 and parent = :parentid and id $insql";
-        $inparams['parentid'] = $parentid;
-        return $categories = $DB->get_records_sql($sql, $inparams);
+        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =$parentid";
+        return $categories = $DB->get_records_sql($sql);
+    }elseif(!empty($catstr)){
+//        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =$parentid && id in ($catstr)";
+        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =$parentid";
+        return $categories = $DB->get_records_sql($sql);
     }
 
 }
@@ -63,15 +75,13 @@ foreach($usercoursess as $cid){
     $coursearray[] =$cid->id;
 }
 
+  $cidstr = implode(",",$coursearray);
     if(is_siteadmin()) {
-        $sql = "select id,fullname from {course} where id != :course and visible = 1 and category = :category";
-        $courses = $DB->get_records_sql($sql, ['course' => $course, 'category' => $category]);
-    }elseif(!empty($coursearray)){
-        list($insql, $inparams) = $DB->get_in_or_equal($coursearray);
-        $sql = "select id,fullname from {course} where id != :course and visible = 1 and category = :category and id $insql";
-        $inparams['course'] = $course;
-        $inparams['category'] = $category;
-        $courses = $DB->get_records_sql($sql, $inparams);
+        $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category";
+        $courses = $DB->get_records_sql($sql);
+    }elseif(!empty($cidstr)){
+        $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category && id in ($cidstr)";
+        $courses = $DB->get_records_sql($sql);
     }
 
     $courselist = "";

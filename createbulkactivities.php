@@ -63,16 +63,11 @@ if (!isset($_POST['createduplicate'])) {
     global $USER, $DB;
 
     $usercourses = enrol_get_users_courses($USER->id, true, Null, 'visible DESC,sortorder ASC');
-
-
-
-
     $encatarray =array();
     $coursearray = array();
-
    function get_parentcategory($catid){
        global $DB;
-           $cat =   $DB->get_record('course_categories',array('id'=>$catid),'id,parent');
+           $cat =   $DB->get_record('course_categories',array('id'=>$catid),'id,parent,name');
             if($cat->parent !=0){
               return    get_parentcategory($cat->parent);
             }else{
@@ -86,7 +81,6 @@ if (!isset($_POST['createduplicate'])) {
         $coursearray[] =  $course->id;
     }
     $parentcat = array_unique($parentcat);
-
     $catstr = implode(",",$encatarray);
     $coursestr = implode(",",$coursearray);
     $parentcatstr = implode(",",$parentcat);
@@ -94,10 +88,11 @@ if (!isset($_POST['createduplicate'])) {
     $cmid = required_param('cba', PARAM_INT);
     $sectionreturn = optional_param('sr', null, PARAM_INT);
 
+
     if(is_siteadmin()){
         $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =0 ";
     }else{
-     $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && id in ($parentcatstr)";
+        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =0  && id in ($parentcatstr)";
     }
 
     $categories = $DB->get_records_sql($sql);
@@ -115,8 +110,6 @@ if (!isset($_POST['createduplicate'])) {
         $usercourses = enrol_get_users_courses($USER->id, true, Null, 'visible DESC,sortorder ASC');
         $encatarray =array();
         $coursearray = array();
-
-
 
         foreach($usercourses as $course){
             $encatarray[] = $course->category;
