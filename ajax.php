@@ -29,13 +29,16 @@ defined('MOODLE_INTERNAL') || die();
 $request = $_REQUEST;
 
 
-function get_parentcategory($catid){
+function get_parentcategory($catid,$catides){
     global $DB;
+
+
     $cat =   $DB->get_record('course_categories',array('id'=>$catid),'id,parent');
+    $catides[] = $cat->id;
     if($cat->parent !=0){
-        return    get_parentcategory($cat->parent);
+        return    get_parentcategory($cat->parent,$catides);
     }else{
-        return $cat->id;
+        return $catides;
     }
 }
 
@@ -44,20 +47,39 @@ function getcategories($parentid) {
     $usercourses = enrol_get_users_courses($USER->id, true, Null, 'visible DESC,sortorder ASC');
     $encatarray =array();
     $coursearray = array();
-
+    $parentcat =array();
+    $catides = array();
     foreach($usercourses as $course){
         $encatarray[] = $course->category;
-        $parentcat []  =   get_parentcategory($course->category);
+        if($course->visible==1) {
+            $parentcat [] = get_parentcategory($course->category, $catides);
+        }
         $coursearray[] =  $course->id;
     }
-    $catstr = implode(",",$encatarray);
+$pcidarray = array();
+    foreach($parentcat as $pcats){
+     foreach($pcats as $pcat){
+         $pcidarray[] =  $pcat;
+     }
+    }
+
+
+
+
+    $parentcat = array_unique($pcidarray);
+    if (($key = array_search($parentid, $parentcat)) !== false) {
+        unset($parentcat[$key]);
+    }
+
+
+     $catstr = implode(",",$parentcat);
 
     if(is_siteadmin()) {
         $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =$parentid";
         return $categories = $DB->get_records_sql($sql);
     }elseif(!empty($catstr)){
 //        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =$parentid && id in ($catstr)";
-        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =$parentid";
+        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent = $parentid && id in ($catstr)";
         return $categories = $DB->get_records_sql($sql);
     }
 

@@ -61,7 +61,6 @@ echo $OUTPUT->header();
 
 if (!isset($_POST['createduplicate'])) {
     global $USER, $DB;
-
     $usercourses = enrol_get_users_courses($USER->id, true, Null, 'visible DESC,sortorder ASC');
     $encatarray =array();
     $coursearray = array();
@@ -75,9 +74,14 @@ if (!isset($_POST['createduplicate'])) {
             }
     }
     $parentcat = array();
+
+
+
     foreach($usercourses as $course){
         $encatarray[] = $course->category;
-        $parentcat []  =   get_parentcategory($course->category);
+        if($course->visible==1) {
+            $parentcat [] = get_parentcategory($course->category);
+        }
         $coursearray[] =  $course->id;
     }
     $parentcat = array_unique($parentcat);
