@@ -22,8 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-$string['pluginname'] = 'Bulk Activity Creation';
-$string['bulkactivity'] = 'Bulk Activity';
+$string['pluginname'] = 'Bulk activity creation';
+$string['bulkactivity'] = 'Bulk activity';
 $string['bulkactivity:addinstance'] = 'Add a new Bulk Activity Creation block';
 $string['createactivityincourses'] = 'Bulk Copy to Courses';
 $string['confirm_copy'] = 'Are you sure?';

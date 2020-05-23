@@ -34,7 +34,7 @@ if (!isset($_POST['createduplicate'])) {
 
     $cm = get_coursemodule_from_id('', $modid, 0, true, MUST_EXIST);
     $context = context_course::instance($cm->course);
-    if (!has_capability('block/bulkactivity:addinstance', $context)) {
+    if (!has_capability('moodle/course:update', $context)) {
         echo get_string('unauthorizedaccesss', 'block_bulkactivity');
         die();
     }
@@ -94,18 +94,21 @@ if (!isset($_POST['createduplicate'])) {
 
 
     if(is_siteadmin()){
-        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =0 ";
-    }else{
-        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =0  && id in ($parentcatstr)";
-    }
 
+        $sql = "select id,name from {course_categories} where coursecount > 0  and visible = 1 and parent = 0 ";
+
+    }else{
+        $sql = "select id,name from {course_categories} where coursecount > 0 and visible =1 and parent =0  and id in ($parentcatstr)";
+    }
     $categories = $DB->get_records_sql($sql);
+
+
 
 
     $cm = get_coursemodule_from_id('', $modid, 0, true, MUST_EXIST);
 
     $context = context_course::instance($cm->course);
-    if (!has_capability('block/bulkactivity:addinstance', $context)) {
+    if (!has_capability('moodle/course:update', $context)) {
         die();
     }
 
@@ -121,10 +124,10 @@ if (!isset($_POST['createduplicate'])) {
         }
         $catstr = implode(",",$encatarray);
         if(is_siteadmin()) {
-            $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category";
+            $sql = "select id,fullname from {course} where id!=$course and visible = 1 and  category = $category";
             $courses = $DB->get_records_sql($sql);
         }elseif(!empty($catstr)){
-            $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category && category in ($catstr)";
+            $sql = "select id,fullname from {course} where id!=$course and visible = 1 and  category = $category and category in ($catstr)";
             $courses = $DB->get_records_sql($sql);
         }
 

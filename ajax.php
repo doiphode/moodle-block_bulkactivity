@@ -75,11 +75,11 @@ $pcidarray = array();
      $catstr = implode(",",$parentcat);
 
     if(is_siteadmin()) {
-        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =$parentid";
+        $sql = "select id,name from {course_categories} where coursecount > 0 and visible =1 and parent =$parentid";
         return $categories = $DB->get_records_sql($sql);
     }elseif(!empty($catstr)){
 //        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =$parentid && id in ($catstr)";
-        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent = $parentid && id in ($catstr)";
+        $sql = "select id,name from {course_categories} where coursecount > 0 and visible =1 and parent = $parentid and id in ($catstr)";
         return $categories = $DB->get_records_sql($sql);
     }
 
@@ -99,10 +99,10 @@ foreach($usercoursess as $cid){
 
   $cidstr = implode(",",$coursearray);
     if(is_siteadmin()) {
-        $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category";
+        $sql = "select id,fullname from {course} where id!=$course and visible = 1 and  category = $category";
         $courses = $DB->get_records_sql($sql);
     }elseif(!empty($cidstr)){
-        $sql = "select id,fullname from {course} where id!=$course && visible = 1 &&  category = $category && id in ($cidstr)";
+        $sql = "select id,fullname from {course} where id!=$course and visible = 1 and  category = $category and id in ($cidstr)";
         $courses = $DB->get_records_sql($sql);
     }
 
