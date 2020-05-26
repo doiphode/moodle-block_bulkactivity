@@ -49,12 +49,16 @@ function getcategories($parentid) {
     $coursearray = array();
     $parentcat =array();
     $catides = array();
-    foreach($usercourses as $course){
-        $encatarray[] = $course->category;
-        if($course->visible==1) {
-            $parentcat [] = get_parentcategory($course->category, $catides);
+    foreach($usercourses as $course) {
+
+        $context = context_course::instance($course->id);
+        if (has_capability('moodle/course:update', $context)) {
+            $encatarray[] = $course->category;
+            if ($course->visible == 1) {
+                $parentcat [] = get_parentcategory($course->category, $catides);
+            }
+            $coursearray[] = $course->id;
         }
-        $coursearray[] =  $course->id;
     }
 $pcidarray = array();
     foreach($parentcat as $pcats){
