@@ -34,6 +34,7 @@ if (!isset($_POST['createduplicate'])) {
 
     $cm = get_coursemodule_from_id('', $modid, 0, true, MUST_EXIST);
     $context = context_course::instance($cm->course);
+//    if (!has_capability('block/bulkactivity:addinstance', $context)) {
     if (!has_capability('moodle/course:update', $context)) {
         echo get_string('unauthorizedaccesss', 'block_bulkactivity');
         die();
@@ -45,9 +46,12 @@ if (!isset($_POST['createduplicate'])) {
 $PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string("pluginname", "block_bulkactivity"));
 $PAGE->set_heading(get_string("pluginname", "block_bulkactivity"));
+//$PAGE->navbar->ignore_active();
 $PAGE->set_url($CFG->wwwroot . "/blocks/bulkactivity/createbulkactivity.php");
 
 $PAGE->requires->jquery();
+//$PAGE->requires->js( new moodle_url('https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js'),true);
+//$PAGE->requires->js( new moodle_url('https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js'),true);
 
 
 $PAGE->requires->css('/blocks/bulkactivity/styles.css');
@@ -109,6 +113,7 @@ if (!isset($_POST['createduplicate'])) {
     $cm = get_coursemodule_from_id('', $modid, 0, true, MUST_EXIST);
 
     $context = context_course::instance($cm->course);
+//    if (!has_capability('block/bulkactivity:addinstance', $context)) {
     if (!has_capability('moodle/course:update', $context)) {
         die();
     }

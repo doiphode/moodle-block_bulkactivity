@@ -50,7 +50,7 @@ class block_bulkactivity extends block_base {
     }
 
     public function has_config() {
-        return true;
+        return false;
     }
 
     /**
