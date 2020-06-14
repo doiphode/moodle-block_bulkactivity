@@ -26,12 +26,16 @@ require_once(dirname(dirname(__FILE__)) . '../../config.php');
 
 defined('MOODLE_INTERNAL') || die();
 
+
 global $PAGE, $CFG, $DB, $OUTPUT;
 $PAGE->set_context(context_system::instance());
-
-if (!isset($_POST['createduplicate'])) {
-    $modid = $_REQUEST["cba"];
-
+require_login();
+require_once($CFG->dirroot.'/blocks/bulkactivity/formslib.php');
+optional_param('createduplicate','',PARAM_TEXT);
+$customdata = array('categories' => array(),'courseid'=>0,'cmid'=>0);
+$company_form = new compactivity_form(null,$customdata);
+if (!($company_form->get_data())) {
+    $modid = required_param('cba', PARAM_INT);
     $cm = get_coursemodule_from_id('', $modid, 0, true, MUST_EXIST);
     $context = context_course::instance($cm->course);
 //    if (!has_capability('block/bulkactivity:addinstance', $context)) {
@@ -40,9 +44,6 @@ if (!isset($_POST['createduplicate'])) {
         die();
     }
 }
-
-
-
 $PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string("pluginname", "block_bulkactivity"));
 $PAGE->set_heading(get_string("pluginname", "block_bulkactivity"));
@@ -55,12 +56,8 @@ $PAGE->requires->jquery();
 
 
 $PAGE->requires->css('/blocks/bulkactivity/styles.css');
-
 echo $OUTPUT->header();
-
-
-
-if (!isset($_POST['createduplicate'])) {
+if (!($company_form->get_data())) {
     global $USER, $DB;
     $usercourses = enrol_get_users_courses($USER->id, true, Null, 'visible DESC,sortorder ASC');
     $encatarray =array();
@@ -93,23 +90,18 @@ if (!isset($_POST['createduplicate'])) {
     $catstr = implode(",",$encatarray);
     $coursestr = implode(",",$coursearray);
     $parentcatstr = implode(",",$parentcat);
-    $modid = $_REQUEST["cba"];
+    $modid = required_param('cba', PARAM_INT);
     $cmid = required_param('cba', PARAM_INT);
     $sectionreturn = optional_param('sr', null, PARAM_INT);
-
-
+    $parm = array(0,1,0);
     if(is_siteadmin()){
-
-        $sql = "select id,name from {course_categories} where coursecount > 0  and visible = 1 and parent = 0 ";
-
+        $sql = "select id,name from {course_categories} where coursecount > ?  and visible = ? and parent = ?";
     }else{
-        $sql = "select id,name from {course_categories} where coursecount > 0 and visible =1 and parent =0  and id in ($parentcatstr)";
+        $clause = implode(',', array_fill(0, count($parentcat), '?'));
+        $parm =   array_merge($parm,$parentcat);
+        $sql = "select id,name from {course_categories} where coursecount > ? and visible =? and parent =?  and id in ($clause)";
     }
-    $categories = $DB->get_records_sql($sql);
-
-
-
-
+    $categories = $DB->get_records_sql($sql,$parm);
     $cm = get_coursemodule_from_id('', $modid, 0, true, MUST_EXIST);
 
     $context = context_course::instance($cm->course);
@@ -118,99 +110,24 @@ if (!isset($_POST['createduplicate'])) {
         die();
     }
 
-    function courselist($category, $course) {
-        global $DB,$USER;
-        $usercourses = enrol_get_users_courses($USER->id, true, Null, 'visible DESC,sortorder ASC');
-        $encatarray =array();
-        $coursearray = array();
-
-        foreach($usercourses as $course){
-            $encatarray[] = $course->category;
-            $coursearray[] =  $course->id;
-        }
-        $catstr = implode(",",$encatarray);
-        if(is_siteadmin()) {
-            $sql = "select id,fullname from {course} where id!=$course and visible = 1 and  category = $category";
-            $courses = $DB->get_records_sql($sql);
-        }elseif(!empty($catstr)){
-            $sql = "select id,fullname from {course} where id!=$course and visible = 1 and  category = $category and category in ($catstr)";
-            $courses = $DB->get_records_sql($sql);
-        }
-
-        $courselist = "";
-        foreach ($courses as $course) {
-            $courselist .= '<div class="col-md-6 custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" name="course[]" value="' . $course->id . '" id="customCheck' . $course->id . '">
-            <label class="custom-control-label" for="customCheck' . $course->id . '">' . $course->fullname . '</label>
-        </div>';
-        }
-        return $courselist;
-
-    }
-
     ?>
-
-    <!--    <script src="//maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js"></script> -->
     <div class="container">
-
-        <input type="hidden" id="currentcourseid" value="<?= $cm->course ?>">
-        <h3 class="categoryname"><?= get_string('courselistheader', 'block_bulkactivity') ?></h3>
-        <form action="createbulkactivities.php" method="post" id="bulkactform">
-            <div class="form-group row">
-                <label for="copyactivityto" class="col-sm-2 col-form-label">Copy activity to :</label>
-                <div class="col-sm-3">
-                    <select class="custom-select mr-sm-2" id="copyactivityto" name="copyactivityto">
-                        <option value="0">Section 0</option>
-                        <option value="1">Section 1</option>
-                        <option value="2">Last Section</option>
-                    </select>
-                </div>
-            </div>
-
-            <?php
-            echo '<div id="blkh3">';
-            echo '<div id="accordion" class="accordion panel-group">
-
-				<div class="panel-body" >';
-            foreach ($categories as $category) {
-                echo ' <div class="panel panel-default" >
-                        <div class="panel-heading categorydiv" id="category_' . $category->id . '" >
-
-						<h3 class="panel-title categoryname" style="font-weight: 100">
-                            <input type="checkbox" class="checkall" id="checkall_' . $category->id . '" value="1">&nbsp;
-                            <a data-toggle="collapse"    aria-expanded="true" aria-controls="collapse_' . $category->id . '"  href="#collapse_' . $category->id . '">
-								<i class="indicator indicatorerro fa fa-caret-right" id="indicatorerro_' . $category->id . '" aria-hidden="true" ></i> ' . $category->name . '
-							</a>
-						</h3>
-					</div>
-                        <div id="collapse_' . $category->id . '" class="collapse collapsesubcat"  data-parent="#accordion" style="padding-left: 15px;padding-right: 15px;">
-                        <div class="card-body" style="padding: 0px;">
-                             <div class="form-row checkbox-group required categorycourses" id="categorycourses_' . $category->id . '" >
-            </div>
-         </div>
-					</div></div>';
-            }
-
-            echo '</div></div>';
-
-            ?>
-            <input type="hidden" name="cmid" value="<?= $cmid ?>">
-            <input type="submit" class="btn btn-primary" value="<?= get_string("submit") ?>" name="createduplicate"
-                   style="margin-top: 30px;">
+        <?php
+        $customdata = array('categories' => $categories,'courseid'=>$cm->course,'cmid'=>$cmid);
+        $company_form = new compactivity_form(null,$customdata);
+        echo $company_form->display();
+        ?>
     </div>
-    </form>
-    </div>
-
-
     <?php
 
 }
 
-if (isset($_POST['createduplicate'])) {
+if ($fromdata = $company_form->get_data()) {
+    $fromdata->course = $sectionreturn = required_param_array('course', PARAM_INT);
 
-    $modid = $_POST['cmid'];
 
-    function duplicate_modulebac($course, $cm) {
+    $modid = $fromdata->cmid;
+    function duplicate_modulebac($course, $cm,$fromdata) {
         global $CFG, $DB, $USER;
         require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
         require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
@@ -219,16 +136,12 @@ if (isset($_POST['createduplicate'])) {
         $a = new stdClass();
         $a->modtype = get_string('modulename', $cm->modname);
         $a->modname = format_string($cm->name);
-
         if (!plugin_supports('mod', $cm->modname, FEATURE_BACKUP_MOODLE2)) {
             throw new moodle_exception('duplicatenosupport', 'error', '', $a);
         }
-
         // Backup the activity.
-
         $bc = new backup_controller(backup::TYPE_1ACTIVITY, $cm->id, backup::FORMAT_MOODLE,
             backup::INTERACTIVE_NO, backup::MODE_IMPORT, $USER->id);
-
         $backupid = $bc->get_backupid();
         $backupbasepath = $bc->get_plan()->get_basepath();
 
@@ -268,12 +181,12 @@ if (isset($_POST['createduplicate'])) {
             }
         }
         if ($newcmid) {
+            $param = array($course->id);
 
-            $sql = "select * from {course_sections} where course = $course->id";
-            $csections = $DB->get_records_sql($sql);
+            $sql = "select * from {course_sections} where course = ?";
+            $csections = $DB->get_records_sql($sql,$param);
             $empsection = array();
             foreach ($csections as $section) {
-
                 $sequencearray = explode(",", $section->sequence);
                 $empsection[] = $section->id;
                 foreach ($sequencearray as $key => $arr) {
@@ -289,12 +202,11 @@ if (isset($_POST['createduplicate'])) {
             }
 
             if ($empsection) {
-
-                if ($_POST['copyactivityto'] == 0) {
+                if ($fromdata->copyactivityto == 0) {
                     $sectionid = min($empsection);
-                } elseif ($_POST['copyactivityto'] == 1) {
+                } elseif ($fromdata->copyactivityto == 1) {
                     $sectionid = $empsection[1];
-                } elseif ($_POST['copyactivityto'] == 2) {
+                } elseif ($fromdata->copyactivityto == 2) {
                     $sectionid = max($empsection);
                 }
 
@@ -350,7 +262,7 @@ if (isset($_POST['createduplicate'])) {
 
     $sesskey = $USER->sesskey;
 
-    foreach ($_POST['course'] as $course_id) {
+    foreach ($fromdata->course as $course_id) {
 
         $cm = get_coursemodule_from_id('', $modid, 0, true, MUST_EXIST);
 
@@ -362,7 +274,7 @@ if (isset($_POST['createduplicate'])) {
         // Duplicate the module.
         $newcourse = $DB->get_record('course', array('id' => $course_id), '*', MUST_EXIST);
 
-        $newcm = duplicate_modulebac($newcourse, $cm, '');
+        $newcm = duplicate_modulebac($newcourse, $cm, $fromdata);
 
     }
 
@@ -377,8 +289,7 @@ echo $OUTPUT->footer();
 ?>
 <script>
 
-    $('#bulkactform').on('change', '.checkall', function () {
-
+    $('.container').on('change', '.checkall', function () {
         var id = this.id;
         var split_id = id.split("_");
 
@@ -420,8 +331,7 @@ echo $OUTPUT->footer();
     });
 
     function toggleChevron(e) {
-        console.log(e.target);
-        console.log($('a').target);
+
 
         $('a')
             .find("i.indicator")
@@ -444,7 +354,10 @@ echo $OUTPUT->footer();
     $('.container').on('click', '.categorydiv', function (e) {
         // toggleChevron(e);
         var id = this.id;
+
+
         var catarray = id.split('_');
+
         if (catarray.length > 2) {
             $('.collapsesubcat' + catarray[1]).each(function () {
                 var divid = $(this).attr('id');

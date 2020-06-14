@@ -25,14 +25,11 @@
 require_once(dirname(dirname(__FILE__)) . '../../config.php');
 
 defined('MOODLE_INTERNAL') || die();
-
-$request = $_REQUEST;
-
+require_login();
+$request = required_param('request', PARAM_TEXT);
 
 function get_parentcategory($catid,$catides){
     global $DB;
-
-
     $cat =   $DB->get_record('course_categories',array('id'=>$catid),'id,parent');
     $catides[] = $cat->id;
     if($cat->parent !=0){
@@ -60,11 +57,11 @@ function getcategories($parentid) {
             $coursearray[] = $course->id;
         }
     }
-$pcidarray = array();
+    $pcidarray = array();
     foreach($parentcat as $pcats){
-     foreach($pcats as $pcat){
-         $pcidarray[] =  $pcat;
-     }
+        foreach($pcats as $pcat){
+            $pcidarray[] =  $pcat;
+        }
     }
 
 
@@ -76,38 +73,43 @@ $pcidarray = array();
     }
 
 
-     $catstr = implode(",",$parentcat);
-
+    $catstr = implode(",",$parentcat);
+    $parm = array(0,1,$parentid);
     if(is_siteadmin()) {
-        $sql = "select id,name from {course_categories} where coursecount > 0 and visible =1 and parent =$parentid";
-        return $categories = $DB->get_records_sql($sql);
+        $sql = "select id,name from {course_categories} where coursecount > ? and visible =? and parent =?";
+        return $categories = $DB->get_records_sql($sql,$parm);
     }elseif(!empty($catstr)){
+        $clause = implode(',', array_fill(0, count($parentcat), '?'));
+        $parm =   array_merge($parm,$parentcat);
+
+
 //        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =$parentid && id in ($catstr)";
-        $sql = "select id,name from {course_categories} where coursecount > 0 and visible =1 and parent = $parentid and id in ($catstr)";
-        return $categories = $DB->get_records_sql($sql);
+        $sql = "select id,name from {course_categories} where coursecount > ? and visible =? and parent = ? and id in ($clause)";
+        return $categories = $DB->get_records_sql($sql,$parm);
     }
 
 }
 
-function courselist($category, $course, $checked) {
+function courselist($category, $course, $checked,$parm) {
     global $DB,$USER;
+
+
+    $parm[] = 1;
     $usercoursess = enrol_get_users_courses($USER->id, true, Null, 'visible DESC,sortorder ASC');
     $encatarray =array();
-
-
-
     $coursearray =  array();
-foreach($usercoursess as $cid){
-    $coursearray[] =$cid->id;
-}
-
-  $cidstr = implode(",",$coursearray);
+    foreach($usercoursess as $cid){
+        $coursearray[] =$cid->id;
+    }
+    $cidstr = implode(",",$coursearray);
     if(is_siteadmin()) {
-        $sql = "select id,fullname from {course} where id!=$course and visible = 1 and  category = $category";
-        $courses = $DB->get_records_sql($sql);
+        $sql = "select id,fullname from {course} where id!=?  and  category = ? and visible = ?";
+        $courses = $DB->get_records_sql($sql,$parm);
     }elseif(!empty($cidstr)){
-        $sql = "select id,fullname from {course} where id!=$course and visible = 1 and  category = $category and id in ($cidstr)";
-        $courses = $DB->get_records_sql($sql);
+        $clause = implode(',', array_fill(0, count($coursearray), '?'));
+        $parm =   array_merge($parm,$coursearray);
+        $sql = "select id,fullname from {course} where id!=? and  category = ? and visible = ? and id in ($clause)";
+        $courses = $DB->get_records_sql($sql,$parm);
     }
 
     $courselist = "";
@@ -143,12 +145,11 @@ foreach($usercoursess as $cid){
     return $courselist;
 }
 
-if ($request['request'] == 'getcagegorycourse') {
-
-    $categoryid = $request['categoryid'];
-    $currentcourseid = $request['currentcourseid'];
-    $checked = $_POST['checked'];
-
-    echo courselist($categoryid, $currentcourseid, $checked);
+if ($request == 'getcagegorycourse') {
+    $categoryid = required_param('categoryid', PARAM_INT);
+    $currentcourseid = required_param('currentcourseid', PARAM_INT);
+    $checked = required_param('checked', PARAM_BOOL);
+    $parm  =array($currentcourseid,$categoryid);
+    echo courselist($categoryid, $currentcourseid, $checked,$parm);
     exit;
 }
