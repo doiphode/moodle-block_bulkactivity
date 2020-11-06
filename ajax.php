@@ -28,12 +28,12 @@ defined('MOODLE_INTERNAL') || die();
 require_login();
 $request = required_param('request', PARAM_TEXT);
 
-function get_parentcategory($catid,$catides){
+function block_get_parentcategory($catid,$catides){
     global $DB;
     $cat =   $DB->get_record('course_categories',array('id'=>$catid),'id,parent');
     $catides[] = $cat->id;
     if($cat->parent !=0){
-        return    get_parentcategory($cat->parent,$catides);
+        return    block_get_parentcategory($cat->parent,$catides);
     }else{
         return $catides;
     }
@@ -52,7 +52,7 @@ function getcategories($parentid) {
         if (has_capability('moodle/course:update', $context)) {
             $encatarray[] = $course->category;
             if ($course->visible == 1) {
-                $parentcat [] = get_parentcategory($course->category, $catides);
+                $parentcat [] = block_get_parentcategory($course->category, $catides);
             }
             $coursearray[] = $course->id;
         }
@@ -79,12 +79,10 @@ function getcategories($parentid) {
         $sql = "select id,name from {course_categories} where coursecount > ? and visible =? and parent =?";
         return $categories = $DB->get_records_sql($sql,$parm);
     }elseif(!empty($catstr)){
-        $clause = implode(',', array_fill(0, count($parentcat), '?'));
-        $parm =   array_merge($parm,$parentcat);
-
-
-//        $sql = "select id,name from {course_categories} where coursecount >= 0 && visible =1 && parent =$parentid && id in ($catstr)";
-        $sql = "select id,name from {course_categories} where coursecount > ? and visible =? and parent = ? and id in ($clause)";
+       
+        list($insql, $inparams) = $DB->get_in_or_equal($parentcat);
+          $parm =   array_merge($inparams,$parm);
+           $sql = "SELECT id,name FROM {course_categories} WHERE id $insql and coursecount > ? and visible =? and parent =?";
         return $categories = $DB->get_records_sql($sql,$parm);
     }
 
@@ -106,10 +104,10 @@ function courselist($category, $course, $checked,$parm) {
         $sql = "select id,fullname from {course} where id!=?  and  category = ? and visible = ?";
         $courses = $DB->get_records_sql($sql,$parm);
     }elseif(!empty($cidstr)){
-        $clause = implode(',', array_fill(0, count($coursearray), '?'));
-        $parm =   array_merge($parm,$coursearray);
-        $sql = "select id,fullname from {course} where id!=? and  category = ? and visible = ? and id in ($clause)";
-        $courses = $DB->get_records_sql($sql,$parm);
+        list($insql, $inparams) = $DB->get_in_or_equal($coursearray);
+          $parm =   array_merge($inparams,$parm);
+           $sql = "SELECT id,fullname FROM {course} WHERE id $insql and id!=? and  category = ? and visible = ?";
+           $courses = $DB->get_records_sql($sql,$parm);
     }
 
     $courselist = "";

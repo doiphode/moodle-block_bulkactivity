@@ -31,3 +31,4 @@ $string['courselistheader'] = 'Select Courses to copy activity to ';
 $string['bulkactivity:create'] = 'Allow user to create Bulk Activity';
 $string['unauthorizedaccesss'] = ' Unauthorized access!';
 $string['copyactivityto'] = ' Copy activity to :';
+$string['selectcourse'] = ' Please Select a Course...';

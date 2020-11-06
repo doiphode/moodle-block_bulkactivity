@@ -32,6 +32,7 @@ $PAGE->set_context(context_system::instance());
 require_login();
 require_once($CFG->dirroot.'/blocks/bulkactivity/formslib.php');
 optional_param('createduplicate','',PARAM_TEXT);
+$modid = required_param('cba', PARAM_INT);
 $customdata = array('categories' => array(),'courseid'=>0,'cmid'=>0);
 $company_form = new compactivity_form(null,$customdata);
 if (!($company_form->get_data())) {
@@ -62,11 +63,11 @@ if (!($company_form->get_data())) {
     $usercourses = enrol_get_users_courses($USER->id, true, Null, 'visible DESC,sortorder ASC');
     $encatarray =array();
     $coursearray = array();
-   function get_parentcategory($catid){
+   function block_get_parentcategory($catid){
        global $DB;
            $cat =   $DB->get_record('course_categories',array('id'=>$catid),'id,parent,name');
             if($cat->parent !=0){
-              return    get_parentcategory($cat->parent);
+              return    block_get_parentcategory($cat->parent);
             }else{
              return $cat->id;
             }
@@ -81,7 +82,7 @@ if (!($company_form->get_data())) {
         $context = context_course::instance($course->id);
         if (has_capability('moodle/course:update', $context)) {
             if ($course->visible == 1) {
-                $parentcat [] = get_parentcategory($course->category);
+                $parentcat [] = block_get_parentcategory($course->category);
             }
             $coursearray[] = $course->id;
         }
@@ -97,13 +98,14 @@ if (!($company_form->get_data())) {
     if(is_siteadmin()){
         $sql = "select id,name from {course_categories} where coursecount > ?  and visible = ? and parent = ?";
     }else{
-        $clause = implode(',', array_fill(0, count($parentcat), '?'));
-        $parm =   array_merge($parm,$parentcat);
-        $sql = "select id,name from {course_categories} where coursecount > ? and visible =? and parent =?  and id in ($clause)";
+
+        list($insql, $inparams) = $DB->get_in_or_equal($parentcat);
+          $parm =   array_merge($inparams,$parm);
+           $sql = "SELECT id,name FROM {course_categories} WHERE id $insql and coursecount > ? and visible =? and parent =?";
+
     }
     $categories = $DB->get_records_sql($sql,$parm);
     $cm = get_coursemodule_from_id('', $modid, 0, true, MUST_EXIST);
-
     $context = context_course::instance($cm->course);
 //    if (!has_capability('block/bulkactivity:addinstance', $context)) {
     if (!has_capability('moodle/course:update', $context)) {
@@ -123,10 +125,19 @@ if (!($company_form->get_data())) {
 }
 
 if ($fromdata = $company_form->get_data()) {
+  $modid = $fromdata->cmid;
+$coursesearray =optional_param_array('course','', PARAM_INT);
+
+
+
+  if($coursesearray==''){
+    $actual_link = new moodle_url('/blocks/bulkactivity/createbulkactivities.php?cba=' . $modid);
+    redirect($actual_link, get_string('selectcourse', 'block_bulkactivity'), '', \core\output\notification::NOTIFY_SUCCESS);
+  }
     $fromdata->course = $sectionreturn = required_param_array('course', PARAM_INT);
 
 
-    $modid = $fromdata->cmid;
+
     function duplicate_modulebac($course, $cm,$fromdata) {
         global $CFG, $DB, $USER;
         require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');

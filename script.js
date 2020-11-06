@@ -264,18 +264,18 @@ require(['jquery'], function ($) {
                 });
             }
 
-            if (course.is_frontpage) {
+            // if (course.is_frontpage) {
                 $('.sitetopic li.activity').each(function () {
                     add_backupbulk_comand($(this));
                 });
                 $('.block_site_main_menu .content > ul > li').each(function () {
                     add_backupbulk_comand($(this));
                 });
-            } else {
+            // } else {
                 $('.course-content li.activity').each(function () {
                     add_backupbulk_comand($(this));
                 });
-            }
+            // }
         };
 
         /**
