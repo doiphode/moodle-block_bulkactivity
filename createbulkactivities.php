@@ -31,6 +31,8 @@ global $PAGE, $CFG, $DB, $OUTPUT;
 $PAGE->set_context(context_system::instance());
 require_login();
 require_once($CFG->dirroot.'/blocks/bulkactivity/formslib.php');
+require_once($CFG->dirroot.'/blocks/bulkactivity/locallib.php');
+
 optional_param('createduplicate','',PARAM_TEXT);
 $modid = required_param('cba', PARAM_INT);
 $customdata = array('categories' => array(),'courseid'=>0,'cmid'=>0);
@@ -132,7 +134,8 @@ $coursesearray =optional_param_array('course','', PARAM_INT);
 
   if($coursesearray==''){
     $actual_link = new moodle_url('/blocks/bulkactivity/createbulkactivities.php?cba=' . $modid);
-    redirect($actual_link, get_string('selectcourse', 'block_bulkactivity'), '', \core\output\notification::NOTIFY_SUCCESS);
+    //redirect($actual_link, get_string('selectcourse', 'block_bulkactivity'), '', \core\output\notification::NOTIFY_SUCCESS);
+      echo '<script>window.location="' . $actual_link . '";</script>';
   }
     $fromdata->course = $sectionreturn = required_param_array('course', PARAM_INT);
 
@@ -171,7 +174,7 @@ $coursesearray =optional_param_array('course','', PARAM_INT);
             $precheckresults = $rc->get_precheck_results();
             if (is_array($precheckresults) && !empty($precheckresults['errors'])) {
                 if (empty($CFG->keeptempdirectoriesonbackup)) {
-                    fulldelete($backupbasepath);
+                   // fulldelete($backupbasepath);
                 }
             }
         }
@@ -243,7 +246,7 @@ $coursesearray =optional_param_array('course','', PARAM_INT);
         $rc->destroy();
 
         if (empty($CFG->keeptempdirectoriesonbackup)) {
-            fulldelete($backupbasepath);
+           // fulldelete($backupbasepath);
         }
 
         // If we know the cmid of the new course module, let us move it
@@ -263,7 +266,7 @@ $coursesearray =optional_param_array('course','', PARAM_INT);
             $modarray = explode(",", trim($section->sequence));
             $cmindex = array_search($cm->id, $modarray);
             if ($cmindex !== false && $cmindex < count($modarray) - 1) {
-                moveto_module($newcm, $section, $modarray[$cmindex + 1]);
+                moveto_module_new($newcm, $section, $modarray[$cmindex + 1]);
             }
 
         }
@@ -291,7 +294,10 @@ $coursesearray =optional_param_array('course','', PARAM_INT);
 
     purge_all_caches();
     $actual_link = new moodle_url('/course/view.php?id=' . $cm->course);
-    redirect($actual_link, '', null, \core\output\notification::NOTIFY_SUCCESS);
+    //redirect($actual_link, '', null, \core\output\notification::NOTIFY_SUCCESS);
+
+    echo '<script>window.location="' . $actual_link . '";</script>';
+
 }
 
 
