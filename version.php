@@ -17,15 +17,14 @@
 /**
  * Bulk Activity Creation
  * @package    block_bulkactivity
- * @copyright  2019 Queen Mary University of London
  * @author     Shubhendra R Doiphode <doiphode.sunny@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2022022000;
+$plugin->version = 2024080200;
 $plugin->requires = 2017050500; // Moodle 3.3.
 $plugin->component = 'block_bulkactivity';
-$plugin->release = '3.9, release 1';
+$plugin->release = '4.1, release 2';
 $plugin->maturity = MATURITY_STABLE; // This is considered as ready for production sites.
