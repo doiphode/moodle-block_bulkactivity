@@ -135,9 +135,25 @@ function courselist($category, $course, $checked,$parm) {
     }
 
     foreach ($courses as $course) {
+
+        // Get course sections 
+        $course_sections = $DB->get_records_sql("select id,section,name from {course_sections} where course=".$course->id." and visible = 1");
+        $selection_html = "<option value='-1'>-- Select Section --</option>";
+        foreach($course_sections as $course_section){
+            $section_name = $course_section->name;
+            $section = $course_section->section;
+
+            if($section == 0 && empty($section_name)){
+                $section_name = "General";
+            }else if($section > 0 && empty($section_name)){
+                $section_name = "Topic ".$section;
+            }
+            $selection_html .= "<option value='".$course_section->id."' >".$section_name."</option>";
+        }
         $courselist .= '<div class="col-md-6 custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" name="course[]" value="' . $course->id . '" id="customCheck' . $course->id . '" ' . $checked . '> <!-- Added checked in the checkbox-->
+            <input type="checkbox" class="custom-control-input" name="course[]" value="' . $course->id . '" id="customCheck' . $course->id . '" ' . $checked . ' onclick="courseChecked(this);" > <!-- Added checked in the checkbox-->
             <label class="custom-control-label" for="customCheck' . $course->id . '">' . $course->fullname . '</label>
+            <select name="coursesection_'.$course->id.'" id="coursesection_'.$course->id.'" style="visibility: hidden;" >'.$selection_html.'</select>
 			</div>';
     }
     return $courselist;
