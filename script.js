@@ -228,6 +228,7 @@ require(['jquery'], function ($) {
 
         $.init_activity_commands = function () {
             function add_backupbulk_comand($activity) {
+                console.log('activity : ' + $activity);
                 var $menu = $activity.find('ul[role=\'menu\']');
 
                 if ($menu.length) {
@@ -273,6 +274,7 @@ require(['jquery'], function ($) {
                 });
             // } else {
                 $('.course-content li.activity').each(function () {
+                
                     add_backupbulk_comand($(this));
                 });
             // }

@@ -27,7 +27,7 @@ class compactivity_form extends moodleform
 								<i class="indicator indicatorerro fa fa-caret-right" id="indicatorerro_' . $category->id . '" aria-hidden="true" ></i> ' . $category->name . '
 							</a>
 						</h3>
-					</div>
+					</div> 
                         <div id="collapse_' . $category->id . '" class="collapse collapsesubcat"  data-parent="#accordion" style="padding-left: 15px;padding-right: 15px;">
                         <div class="card-body" style="padding: 0px;">
                              <div class="form-row checkbox-group required categorycourses" id="categorycourses_' . $category->id . '" >
@@ -44,9 +44,7 @@ class compactivity_form extends moodleform
         $mform->addElement('hidden', 'cmid');
         $mform->setType('cmid', PARAM_INT);
         $mform->addElement('header','displayinfo', get_string('courselistheader', 'block_bulkactivity'));
-        $mform->addElement('select', 'copyactivityto', get_string('copyactivityto', 'block_bulkactivity'), array(0=>'Section 0',1=>'Section 1',2=>'Last Section'));
-        $mform->setType('copyactivityto', PARAM_RAW);
-        $mform->addRule('copyactivityto', null, 'required', null, 'client');
+        
         $mform->addElement('html', $html);
         $mform->addElement('submit', 'submin_but', get_string('submit'));
         $mform->setDefault( 'currentcourseid', $courseid);
