@@ -33,6 +33,7 @@ require_login();
 require_once($CFG->dirroot.'/blocks/bulkactivity/formslib.php');
 require_once($CFG->dirroot.'/blocks/bulkactivity/locallib.php');
 
+
 optional_param('createduplicate','',PARAM_TEXT);
 $modid = required_param('cba', PARAM_INT);
 $customdata = array('categories' => array(),'courseid'=>0,'cmid'=>0);
@@ -127,21 +128,23 @@ if (!($company_form->get_data())) {
 }
 
 if ($fromdata = $company_form->get_data()) {
-  $modid = $fromdata->cmid;
-$coursesearray =optional_param_array('course','', PARAM_INT);
+    $modid = $fromdata->cmid;
+    $coursesearray =optional_param_array('course','', PARAM_INT);
 
-
-
-  if($coursesearray==''){
-    $actual_link = new moodle_url('/blocks/bulkactivity/createbulkactivities.php?cba=' . $modid);
-    //redirect($actual_link, get_string('selectcourse', 'block_bulkactivity'), '', \core\output\notification::NOTIFY_SUCCESS);
+    
+    if($coursesearray==''){
+        $actual_link = new moodle_url('/blocks/bulkactivity/createbulkactivities.php?cba=' . $modid);
+        //redirect($actual_link, get_string('selectcourse', 'block_bulkactivity'), '', \core\output\notification::NOTIFY_SUCCESS);
       echo '<script>window.location="' . $actual_link . '";</script>';
-  }
+    }
     $fromdata->course = $sectionreturn = required_param_array('course', PARAM_INT);
+    $coursesection = array();
+    foreach($fromdata->course as $courseid){
+        $coursesection[$courseid] = required_param('coursesection_'.$courseid, PARAM_INT);
+    }
+    
 
-
-
-    function duplicate_modulebac($course, $cm,$fromdata) {
+    function duplicate_modulebac($course, $cm,$fromdata,$copyactivityto) {
         global $CFG, $DB, $USER;
         require_once($CFG->dirroot . '/backup/util/includes/backup_includes.php');
         require_once($CFG->dirroot . '/backup/util/includes/restore_includes.php');
@@ -216,14 +219,19 @@ $coursesearray =optional_param_array('course','', PARAM_INT);
             }
 
             if ($empsection) {
-                if ($fromdata->copyactivityto == 0) {
+                /*if ($fromdata->copyactivityto == 0) {
                     $sectionid = min($empsection);
                 } elseif ($fromdata->copyactivityto == 1) {
                     $sectionid = $empsection[1];
                 } elseif ($fromdata->copyactivityto == 2) {
                     $sectionid = max($empsection);
-                }
+                }*/
 
+                if($copyactivityto == -1){
+                     $sectionid = max($empsection);
+                }else{
+                    $sectionid = $copyactivityto;
+                }
 
                 $sescq = $DB->get_record('course_sections', array('id' => $sectionid), 'sequence');
                 $oldsec = $sescq->sequence;
@@ -288,7 +296,8 @@ $coursesearray =optional_param_array('course','', PARAM_INT);
         // Duplicate the module.
         $newcourse = $DB->get_record('course', array('id' => $course_id), '*', MUST_EXIST);
 
-        $newcm = duplicate_modulebac($newcourse, $cm, $fromdata);
+        $sectionid = $coursesection[$course_id];
+        $newcm = duplicate_modulebac($newcourse, $cm, $fromdata,$sectionid);
 
     }
 
@@ -305,7 +314,14 @@ echo $OUTPUT->footer();
 
 ?>
 <script>
-
+    function courseChecked(el){
+        var value = $(el).val();
+        if ($(el).is(':checked')) {
+            $('#coursesection_'+value).css("visibility","visible");
+        }else{
+            $('#coursesection_'+value).css("visibility","hidden");
+        }
+    }
     $('.container').on('change', '.checkall', function () {
         var id = this.id;
         var split_id = id.split("_");
@@ -333,7 +349,12 @@ echo $OUTPUT->footer();
             $('#collapse_' + postfix + " input[type=checkbox]").each(function () {
 
                 $(this).prop('checked', checked); // Checks it
-
+                var value = $(this).val();
+                if ($(this).is(':checked')) {
+                    $('#coursesection_'+value).css("visibility","visible");
+                }else{
+                    $('#coursesection_'+value).css("visibility","hidden");
+                }
             });
         }, 1000);
 
