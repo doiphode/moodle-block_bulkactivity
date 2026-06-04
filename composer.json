@@ -1,0 +1,7 @@
+{
+    "name": "doiphode/moodle-block_bulkactivity",
+    "type": "moodle-block",
+    "extra": {
+        "installer-name": "bulkactivity"
+    }
+}
