@@ -23,6 +23,7 @@
  */
 
 require_once(dirname(dirname(__FILE__)) . '../../config.php');
+require_once($CFG->dirroot.'/blocks/bulkactivity/locallib.php');
 
 defined('MOODLE_INTERNAL') || die();
 require_login();
@@ -79,7 +80,7 @@ function getcategories($parentid) {
         $sql = "select id,name from {course_categories} where coursecount > ? and visible =? and parent =?";
         return $categories = $DB->get_records_sql($sql,$parm);
     }elseif(!empty($catstr)){
-       
+
         list($insql, $inparams) = $DB->get_in_or_equal($parentcat);
           $parm =   array_merge($inparams,$parm);
            $sql = "SELECT id,name FROM {course_categories} WHERE id $insql and coursecount > ? and visible =? and parent =?";
@@ -88,9 +89,10 @@ function getcategories($parentid) {
 
 }
 
-function courselist($category, $course, $checked,$parm) {
-    global $DB,$USER;
+function courselist($category, $course, $checked, $parm, $selectedcourses=[]) {
+    global $DB, $USER, $CFG;
 
+    $bsattrs = block_bulkactivity_bs_attrs();
 
     $parm[] = 1;
     $usercoursess = enrol_get_users_courses($USER->id, true, Null, 'visible DESC,sortorder ASC');
@@ -119,7 +121,7 @@ function courselist($category, $course, $checked,$parm) {
 				<div class="panel-heading categorydiv" id="category_' . $category . '_' . $chidld->id . '" >
 				<h3 class="panel-title categoryname">
 				<input type="checkbox" value="1" id="checkall_' . $category . '_' . $chidld->id . '" class="checkall">
-				<a data-toggle="collapse"    aria-expanded="true" aria-controls="collapse_' . $category . '_' . $chidld->id . '"  href="#collapse_' . $category . '_' . $chidld->id . '">
+				<a ' . $bsattrs['toggle'] . '="collapse"    aria-expanded="true" aria-controls="collapse_' . $category . '_' . $chidld->id . '"  href="#collapse_' . $category . '_' . $chidld->id . '">
 				<i class="indicator indicatorerro' . $category . $chidld->id . ' fa fa-caret-right"  id="indicatorerro_' . $category . '' . $chidld->id . '" aria-hidden="true" ></i> ' . $chidld->name . '
 				</a>
 				</h3>
@@ -136,7 +138,7 @@ function courselist($category, $course, $checked,$parm) {
 
     foreach ($courses as $course) {
 
-        // Get course sections 
+        // Get course sections
         $course_sections = $DB->get_records_sql("select id,section,name from {course_sections} where course=".$course->id." and visible = 1");
         $selection_html = "<option value='-1'>-- Select Section --</option>";
         foreach($course_sections as $course_section){
@@ -150,10 +152,19 @@ function courselist($category, $course, $checked,$parm) {
             }
             $selection_html .= "<option value='".$course_section->id."' >".$section_name."</option>";
         }
+
+        // Course is already selected so make the course as selected.
+        $coursechecked = $checked;
+        $sectionstatus = 'hidden';
+        if (in_array($course->id, $selectedcourses)) {
+            $coursechecked = 'checked';
+            $sectionstatus = 'visible';
+        }
+
         $courselist .= '<div class="col-md-6 custom-control custom-checkbox">
-            <input type="checkbox" class="custom-control-input" name="course[]" value="' . $course->id . '" id="customCheck' . $course->id . '" ' . $checked . ' onclick="courseChecked(this);" > <!-- Added checked in the checkbox-->
+            <input type="checkbox" class="custom-control-input" name="course[]" value="' . $course->id . '" id="customCheck' . $course->id . '" ' . $coursechecked . ' onclick="courseChecked(this);" > <!-- Added checked in the checkbox-->
             <label class="custom-control-label" for="customCheck' . $course->id . '">' . $course->fullname . '</label>
-            <select name="coursesection_'.$course->id.'" id="coursesection_'.$course->id.'" style="visibility: hidden;" >'.$selection_html.'</select>
+            <select name="coursesection_'.$course->id.'" id="coursesection_'.$course->id.'" style="visibility: ' . $sectionstatus . ';" >'.$selection_html.'</select>
 			</div>';
     }
     return $courselist;
@@ -163,7 +174,9 @@ if ($request == 'getcagegorycourse') {
     $categoryid = required_param('categoryid', PARAM_INT);
     $currentcourseid = required_param('currentcourseid', PARAM_INT);
     $checked = required_param('checked', PARAM_BOOL);
+    $selectedcourses = optional_param_array('selectedcourses', [], PARAM_INT);
+
     $parm  =array($currentcourseid,$categoryid);
-    echo courselist($categoryid, $currentcourseid, $checked,$parm);
+    echo courselist($categoryid, $currentcourseid, $checked, $parm, $selectedcourses);
     exit;
 }

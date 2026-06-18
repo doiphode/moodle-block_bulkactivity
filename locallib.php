@@ -5,6 +5,10 @@ defined('MOODLE_INTERNAL') || die();
 function moveto_module_new($mod, $section, $beforemod=NULL) {
     global $OUTPUT, $DB;
 
+    if (empty($mod) || empty($section)) {
+        return false;
+    }
+
     // Current module visibility state - return value of this function.
     $modvisible = $mod->visible;
 
@@ -27,4 +31,18 @@ function moveto_module_new($mod, $section, $beforemod=NULL) {
     // Add the module into the new section.
     course_add_cm_to_section($section->course, $mod->id, $section->section, $beforemod);
     return $modvisible;
+}
+/**
+ * Get Bootstrap data-* attribute names compatible with the current Moodle version.
+ * Moodle 5.0+ uses Bootstrap 5 (data-bs-toggle / data-bs-parent),
+ * Moodle 4.x uses Bootstrap 4 (data-toggle / data-parent).
+ *
+ * @return array ['toggle' => string, 'parent' => string]
+ */
+function block_bulkactivity_bs_attrs() {
+    global $CFG;
+    if ((int)$CFG->branch >= 500) {
+        return array('toggle' => 'data-bs-toggle', 'parent' => 'data-bs-parent');
+    }
+    return array('toggle' => 'data-toggle', 'parent' => 'data-parent');
 }
