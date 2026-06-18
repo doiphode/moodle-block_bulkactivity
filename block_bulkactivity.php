@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 class block_bulkactivity extends block_base {
     public function init() {
         $this->title = get_string('pluginname', __CLASS__);
-        $this->version = 2015012700;
+
     }
 
     public function applicable_formats() {

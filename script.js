@@ -24,8 +24,8 @@ require(['jquery'], function ($) {
 
         // @var {Object}  The icon configurations.
         var icon = {
-            'createactivityincourses': {css: 'editing_backupbulk', pix: 'i/twoway'},
-            'backupbulk': {css: 'editing_backupbulk', pix: 'i/twoway'},
+            'createactivityincourses': { css: 'editing_backupbulk', pix: 'i/twoway' },
+            'backupbulk': { css: 'editing_backupbulk', pix: 'i/twoway' },
         };
 
         // @var {Node}  The Bulk Activity block container node.
@@ -137,7 +137,7 @@ require(['jquery'], function ($) {
          * @returns {*|jQuery}
          */
         function add_spinner($node) {
-            var WAITICON = {'pix': 'i/loading_small', 'component': 'moodle'};
+            var WAITICON = { 'pix': 'i/loading_small', 'component': 'moodle' };
 
             if ($node.find('.spinner').length) {
                 return $node.find('.spinner');
@@ -228,7 +228,6 @@ require(['jquery'], function ($) {
 
         $.init_activity_commands = function () {
             function add_backupbulk_comand($activity) {
-                console.log('activity : ' + $activity);
                 var $menu = $activity.find('ul[role=\'menu\']');
 
                 if ($menu.length) {
@@ -247,7 +246,7 @@ require(['jquery'], function ($) {
 
                 } else {
                     var $backupbulk = create_command('createactivityincourses');
-                    $menu = $activity.find('div[role="menu"]');
+                    $menu = $activity.find('div[role="menu"]:not(.dropdown-subpanel-content)');
                     if ($menu.length) {
                         $backupbulk = create_special_activity_command('createactivityincourses');
                         $menu.append($backupbulk.attr('role', 'menuitem'));
@@ -266,18 +265,48 @@ require(['jquery'], function ($) {
             }
 
             // if (course.is_frontpage) {
-                $('.sitetopic li.activity').each(function () {
-                    add_backupbulk_comand($(this));
-                });
-                $('.block_site_main_menu .content > ul > li').each(function () {
-                    add_backupbulk_comand($(this));
-                });
+            $('.sitetopic li.activity').each(function () {
+                add_backupbulk_comand($(this));
+            });
+            $('.block_site_main_menu .content > ul > li').each(function () {
+                add_backupbulk_comand($(this));
+            });
             // } else {
-                $('.course-content li.activity').each(function () {
-                
-                    add_backupbulk_comand($(this));
-                });
+            $('.course-content li.activity').each(function () {
+
+                add_backupbulk_comand($(this));
+            });
             // }
+
+            const observeModuleUpdates = (node) => {
+                add_backupbulk_comand($(node))
+            };
+
+            if (document.querySelector('.course-content') != undefined) {
+                const observer = new MutationObserver((mutations) => {
+                    for (const mutation of mutations) {
+                        // Check added/replaced activity elements
+                        mutation.addedNodes.forEach((node) => {
+                            if (!(node instanceof HTMLElement)) {
+                                return;
+                            }
+
+                            // A whole activity was added
+                            if (node.matches('li.activity')) {
+                                observeModuleUpdates(node);
+                            }
+
+                            // Or activities inside a larger updated block
+                            node.querySelectorAll?.('li.activity').forEach(observeModuleUpdates);
+                        });
+                    }
+                });
+
+                observer.observe(document.querySelector('.course-content'), {
+                    childList: true,
+                    subtree: true
+                });
+            }
         };
 
         /**
@@ -289,7 +318,7 @@ require(['jquery'], function ($) {
             $.init_activity_commands();
         };
 
-        var WAITICON = {'pix': 'i/loading', 'component': 'moodle'};
+        var WAITICON = { 'pix': 'i/loading', 'component': 'moodle' };
         var $spinner = $('<img/>').attr('src', M.util.image_url(WAITICON.pix, WAITICON.component)).addClass('spinner');
         $('div#bulkactivity-spinner-modal div.spinner-container').prepend($spinner);
 
