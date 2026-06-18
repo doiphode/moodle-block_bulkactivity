@@ -52,7 +52,7 @@ $PAGE->set_pagelayout('admin');
 $PAGE->set_title(get_string("pluginname", "block_bulkactivity"));
 $PAGE->set_heading(get_string("pluginname", "block_bulkactivity"));
 //$PAGE->navbar->ignore_active();
-$PAGE->set_url($CFG->wwwroot . "/blocks/bulkactivity/createbulkactivity.php");
+$PAGE->set_url(new moodle_url($CFG->wwwroot . "/blocks/bulkactivity/createbulkactivities.php", ['cba' => $modid]));
 
 $PAGE->requires->jquery();
 //$PAGE->requires->js( new moodle_url('https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js'),true);
@@ -131,7 +131,7 @@ if ($fromdata = $company_form->get_data()) {
     $modid = $fromdata->cmid;
     $coursesearray =optional_param_array('course','', PARAM_INT);
 
-    
+
     if($coursesearray==''){
         $actual_link = new moodle_url('/blocks/bulkactivity/createbulkactivities.php?cba=' . $modid);
         //redirect($actual_link, get_string('selectcourse', 'block_bulkactivity'), '', \core\output\notification::NOTIFY_SUCCESS);
@@ -142,7 +142,7 @@ if ($fromdata = $company_form->get_data()) {
     foreach($fromdata->course as $courseid){
         $coursesection[$courseid] = required_param('coursesection_'.$courseid, PARAM_INT);
     }
-    
+
 
     function duplicate_modulebac($course, $cm,$fromdata,$copyactivityto) {
         global $CFG, $DB, $USER;
@@ -264,8 +264,6 @@ if ($fromdata = $company_form->get_data()) {
         if ($newcmid) {
             // Proceed with activity renaming before everything else. We don't use APIs here to avoid
             // triggering a lot of create/update duplicated events.
-
-
             $newcm = get_coursemodule_from_id($cm->modname, $newcmid, $cm->course);
             // Add ' (copy)' to duplicates. Note we don't cleanup or validate lengths here. It comes
             // from original name that was valid, so the copy should be too.
@@ -276,7 +274,6 @@ if ($fromdata = $company_form->get_data()) {
             if ($cmindex !== false && $cmindex < count($modarray) - 1) {
                 moveto_module_new($newcm, $section, $modarray[$cmindex + 1]);
             }
-
         }
 
         return isset($newcm) ? $newcm : null;
@@ -339,15 +336,22 @@ echo $OUTPUT->footer();
         var checked = false;
         if ($(this).is(":checked")) {
             checked = true;
-            console.log("checked");
         } else {
-            console.log("unchecked");
+            checked = false;
         }
+
+        var collapse = $(this).parent().find('[data-bs-toggle="collapse"]');
 
         setTimeout(function () {
             console.log("id : #collapse_" + postfix);
-            $('#collapse_' + postfix + " input[type=checkbox]").each(function () {
+            // When checkall is clicked if the collapse is not open trigger the click to open the collapse and show the courses.
+            if (checked && collapse && collapse.attr('aria-expanded') == "false") {
+                // collapse.trigger('click');
+                $('#collapse_' + postfix).addClass('show');
+                collapse.attr('aria-expanded', 'true');
+            }
 
+            $('#collapse_' + postfix + " input[type=checkbox]").each(function () {
                 $(this).prop('checked', checked); // Checks it
                 var value = $(this).val();
                 if ($(this).is(':checked')) {
@@ -454,6 +458,20 @@ echo $OUTPUT->footer();
                 checked = "checked";
             }
         }
+
+        // Selected courses.
+        var formdata = new FormData($(this).parents('form')[0]);
+        var selectedcourses = formdata.getAll('course[]');
+
+        var courseSections = {};
+        // Loop through all key-value entries
+        for (const [key, value] of formdata.entries()) {
+            console.log(key, value);
+            if (key.startsWith('coursesection_')) {
+                courseSections[key] = value;
+            }
+        }
+
         $.ajax({
             url: get_action_url('ajax'),
             type: 'POST',
@@ -461,10 +479,17 @@ echo $OUTPUT->footer();
                 'request': 'getcagegorycourse',
                 categoryid: categoryid,
                 currentcourseid: currentcourseid,
-                checked: checked
+                checked: checked,
+                selectedcourses: selectedcourses
             },// Added checked: checked
             success: function (data) {
                 $('#categorycourses_' + coursediv).html(data);
+                $('#categorycourses_' + coursediv).parents('form').find('[name^="coursesection_"]').each(function() {
+                    var nameAttr = $(this).attr('name');
+                    if (courseSections[nameAttr] !== undefined) {
+                        $(this).val(courseSections[nameAttr]);
+                    }
+                });
 
             }
         });

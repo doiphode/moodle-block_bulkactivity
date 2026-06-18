@@ -4,6 +4,13 @@
 
 #blkh3 .form-row {
     margin-left: 22px !important;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+}
+
+#blkh3 .form-row > .panel-group {
+    width: 100%;
 }
 
 #blkh3 .collapsesubcat {

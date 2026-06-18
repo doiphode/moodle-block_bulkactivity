@@ -23,8 +23,8 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->version = 2024080200;
+$plugin->version = 2026061700;
 $plugin->requires = 2017050500; // Moodle 3.3.
 $plugin->component = 'block_bulkactivity';
-$plugin->release = '4.1, release 2';
+$plugin->release = '4.2, release 2';
 $plugin->maturity = MATURITY_STABLE; // This is considered as ready for production sites.

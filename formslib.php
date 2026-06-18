@@ -7,6 +7,7 @@ class compactivity_form extends moodleform
     function definition()
     {
         global $DB, $USER,$CFG,$OUTPUT;
+        $bsattrs = block_bulkactivity_bs_attrs();
         $this->_form = new MoodleQuickForm($this->_formname, 'post', '');
         $categories = $this->_customdata['categories'];
         $courseid = $this->_customdata['courseid'];
@@ -23,11 +24,11 @@ class compactivity_form extends moodleform
 
 						<h3 class="panel-title categoryname" style="font-weight: 100">
                             <input type="checkbox" class="checkall" id="checkall_' . $category->id . '" value="1">&nbsp;
-                            <a data-toggle="collapse"    aria-expanded="true" aria-controls="collapse_' . $category->id . '"  href="#collapse_' . $category->id . '">
+                            <a ' . $bsattrs['toggle'] . '="collapse"    aria-expanded="false" aria-controls="collapse_' . $category->id . '"  href="#collapse_' . $category->id . '">
 								<i class="indicator indicatorerro fa fa-caret-right" id="indicatorerro_' . $category->id . '" aria-hidden="true" ></i> ' . $category->name . '
 							</a>
 						</h3>
-					</div> 
+					</div>
                         <div id="collapse_' . $category->id . '" class="collapse collapsesubcat"  data-parent="#accordion" style="padding-left: 15px;padding-right: 15px;">
                         <div class="card-body" style="padding: 0px;">
                              <div class="form-row checkbox-group required categorycourses" id="categorycourses_' . $category->id . '" >
@@ -44,7 +45,7 @@ class compactivity_form extends moodleform
         $mform->addElement('hidden', 'cmid');
         $mform->setType('cmid', PARAM_INT);
         $mform->addElement('header','displayinfo', get_string('courselistheader', 'block_bulkactivity'));
-        
+
         $mform->addElement('html', $html);
         $mform->addElement('submit', 'submin_but', get_string('submit'));
         $mform->setDefault( 'currentcourseid', $courseid);
